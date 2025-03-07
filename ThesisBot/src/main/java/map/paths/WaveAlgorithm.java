@@ -1,23 +1,18 @@
-package map;
+package map.paths;
+
+import map.MapCreator;
 
 import java.awt.*;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.Queue;
 
-public class WaveAlgorithm {
-    private final int[][] matrix;
-    private final int rows;
-    private final int cols;
-    private final int[][] distances;
-    private LinkedList<Point> path;
-
+public class WaveAlgorithm extends PathfindingAbstractClass {
     public WaveAlgorithm(MapCreator mapCreator) {
-        this.matrix = mapCreator.generateMapMatrix();
-        this.rows = matrix.length;
-        this.cols = matrix[0].length;
-        this.distances = new int[rows][cols];
-        this.path = new LinkedList<Point>();
+        super(mapCreator);
     }
 
+    @Override
     public void findPath(Point start, Point end) {
         if (!isValid(start) || !isValid(end)) {
             throw new IllegalArgumentException("Invalid start or end point");
@@ -55,7 +50,7 @@ public class WaveAlgorithm {
     private LinkedList<Point> reconstructPath(Point start, Point end) {
         LinkedList<Point> path = new LinkedList<>();
         if (distances[end.y][end.x] == Integer.MAX_VALUE) {
-            return path; // Путь не найден
+            return path;
         }
 
         Point current = end;
@@ -79,22 +74,6 @@ public class WaveAlgorithm {
             }
         }
 
-        return path;
-    }
-
-    private boolean isValid(Point p) {
-        return isInBounds(p.x, p.y) && matrix[p.y][p.x] != -1;
-    }
-
-    private boolean isInBounds(int x, int y) {
-        return x >= 0 && x < cols && y >= 0 && y < rows;
-    }
-
-    public int[][] getDistances(){
-        return distances;
-    }
-
-    public LinkedList<Point> getPath(){
         return path;
     }
 }
