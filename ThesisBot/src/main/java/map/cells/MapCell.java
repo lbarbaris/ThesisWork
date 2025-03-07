@@ -1,9 +1,11 @@
-package map;
+package map.cells;
 
 import java.awt.*;
 
-public class Block extends Rectangle {
-    public Block(int x, int y) {
+
+//То же самое, что и Cell, но наследуется от Rectangle
+public class MapCell extends Rectangle {
+    public MapCell(int x, int y) {
         super(x, y, 20, 20);
     }
 }
