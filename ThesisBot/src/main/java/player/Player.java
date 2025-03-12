@@ -6,11 +6,21 @@ public class Player {
     private double x, y; // Позиция игрока
     private int cameraX, cameraY; // Камера
     private Gun gun; // Текущее оружие игрока
+    private short hp;
 
     public Player(double startX, double startY, Gun gun) {
         this.x = startX;
         this.y = startY;
         this.gun = gun;
+        this.hp = 100;
+    }
+
+    public void doDamage(short damage){
+        hp = (short) (hp - damage);
+    }
+
+    public void heal (short heal){
+        hp = (short) (hp + heal);
     }
 
     public double getX() {

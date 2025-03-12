@@ -1,5 +1,6 @@
-package map;
+package map.paths;
 
+import map.MapCreator;
 import map.paths.PathfindingAbstractClass;
 
 import java.awt.*;

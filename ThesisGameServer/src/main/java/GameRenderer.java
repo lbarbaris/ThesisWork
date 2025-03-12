@@ -23,9 +23,17 @@ public class GameRenderer extends JPanel {
         }
 
         // Отрисовка игроков
-        g2.setColor(Color.BLUE);
+
         for (SimpleGameServer.PlayerState state : playerStates.values()) {
-            g2.fillRect(state.x, state.y, 20, 20);
+            if (!state.isBot){
+                g2.setColor(Color.BLUE);
+                g2.fillRect(state.x, state.y, 20, 20);
+            }
+            else {
+                g2.setColor(Color.GREEN);
+                g2.fillRect(state.x, state.y, 20, 20);
+            }
+
         }
     }
 }

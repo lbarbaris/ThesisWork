@@ -1,15 +1,15 @@
 package utils;
 
-import map.Block;
+import map.cells.MapCell;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
 public class CollisionManager {
-    private ArrayList<Block> map;
+    private ArrayList<MapCell> map;
 
-    public CollisionManager(ArrayList<Block> map) {
+    public CollisionManager(ArrayList<MapCell> map) {
         this.map = map;
     }
 

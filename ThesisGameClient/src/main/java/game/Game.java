@@ -14,7 +14,7 @@ public class Game {
         gameTimer.start();
 
         frame.add(gameController);
-        frame.setSize(1920, 1080);
+        frame.setSize(1000, 1000);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
     }

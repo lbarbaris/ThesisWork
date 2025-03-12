@@ -2,10 +2,16 @@ package network;
 
 import movement.MovementManager;
 
+import java.awt.*;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -16,29 +22,24 @@ public class NetworkHandler {
     private final int serverPort;
     private final ExecutorService networkThreads = Executors.newFixedThreadPool(2);
     private volatile boolean running = true;
+    private final boolean isBot = false;
+    private HashMap<String, Enemy> PlayerCoords;
 
     public NetworkHandler(String serverHost, int serverPort, MovementManager movementManager) throws IOException {
         this.socket = new DatagramSocket();
         this.serverAddress = InetAddress.getByName(serverHost);
         this.serverPort = serverPort;
         this.movementManager = movementManager;
-
+        this.PlayerCoords = new HashMap<>();
     }
 
     public void startNetworkThreads() {
         // Поток отправки данных
         networkThreads.execute(() -> {
-            int i = 0;
             while (running) {
                 try {
-                    Frame frame = new Frame(movementManager.getCoords());
-                    if (i % 100 == 0){
-
-                    }
-                    i++;
-
+                    Frame frame = new Frame(movementManager.getCoords(), isBot);
                     sendMovementRequest(frame);
-
                     Thread.sleep(5); // Частота отправки пакетов
                 } catch (InterruptedException | IOException e) {
                     e.printStackTrace();
@@ -77,13 +78,25 @@ public class NetworkHandler {
         int serverX = Integer.parseInt(parts[0]);
         int serverY = Integer.parseInt(parts[1]);
         long serverTimeStamp = Long.parseLong(parts[2]);
-
         movementManager.applyServerData(serverX, serverY, serverTimeStamp);
+
+
+        for (int i = 3; i < parts.length - 3; i += 4){
+            PlayerCoords.put(parts[i + 2], new Enemy(Boolean.parseBoolean(parts[i + 3]), Integer.parseInt(parts[i]), Integer.parseInt(parts[i + 1])));
+        }
+
     }
+
+    public HashMap<String, Enemy> getPlayerCoords(){
+        return PlayerCoords;
+    }
+
 
     public void stop() {
         running = false;
         socket.close();
         networkThreads.shutdownNow();
     }
+
+
 }

@@ -3,6 +3,7 @@ package game;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import network.NetworkHandler;
@@ -35,13 +36,19 @@ public class GameController extends JPanel {
     private final GameRenderer gameRenderer;
 
     public GameController() throws IOException {
-        playerCameraManager = new PlayerCameraManager(1920, 1080);
+        playerCameraManager = new PlayerCameraManager(1000, 1000);
 
         Gun targetGun = new Gun(100, 8.0, 5.0, 10, 3000);
         targetPlayer = new Player(200, 200, targetGun);
         targetHit = false;
 
         mapCreator = new MapCreator((short) 3);
+        System.out.println(
+                Arrays.deepToString(mapCreator.generateMapMatrix())
+                        .replace("], ", "]\n")  // Перенос строки после каждой строки массива
+                        .replace("[[", "[\n[")  // Перенос строки после первой скобки
+                        .replace("]]", "]\n]")  // Перенос строки перед закрывающей скобкой
+        );
         collisionManager = new CollisionManager(mapCreator.getMap());
         setFocusable(true);
 
@@ -57,7 +64,7 @@ public class GameController extends JPanel {
         networkHandler = new NetworkHandler("localhost", 12345, playerMovementManager);
         networkHandler.startNetworkThreads();
 
-        gameRenderer = new GameRenderer(playerCameraManager, targetPlayer, bullets, mapCreator, playerMovementManager, squareSize);
+        gameRenderer = new GameRenderer(playerCameraManager, targetPlayer, bullets, mapCreator, playerMovementManager,  networkHandler, squareSize);
     }
 
     public void setupShootingLoop(){

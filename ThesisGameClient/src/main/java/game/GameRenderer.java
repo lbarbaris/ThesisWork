@@ -2,9 +2,15 @@ package game;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import bullets.Gun;
+import network.Enemy;
+import network.NetworkHandler;
 import player.Player;
 import bullets.Bullet;
 import map.MapCreator;
@@ -18,9 +24,11 @@ public class GameRenderer {
     private final MapCreator mapCreator;
     private final MovementManager playerMovementManager;
     private final int squareSize;
+    private final NetworkHandler networkHandler;
 
     public GameRenderer(PlayerCameraManager playerCameraManager, Player targetPlayer, CopyOnWriteArrayList<Bullet> bullets,
-                        MapCreator mapCreator, MovementManager playerMovementManager, int squareSize) {
+                        MapCreator mapCreator, MovementManager playerMovementManager, NetworkHandler networkHandler, int squareSize) {
+        this.networkHandler = networkHandler;
         this.playerCameraManager = playerCameraManager;
         this.targetPlayer = targetPlayer;
         this.bullets = bullets;
@@ -47,6 +55,20 @@ public class GameRenderer {
         g2.setColor(Color.BLUE);
         g2.fillRect(playerMovementManager.getX(), playerMovementManager.getY(), squareSize, squareSize);
 
+
+        HashMap<String, Enemy> coords = networkHandler.getPlayerCoords();
+
+        for (Map.Entry<String, Enemy> entry1: coords.entrySet()){
+            if (entry1.getValue().isBot()){
+                g2.setColor(Color.GREEN);
+                g2.fillRect(entry1.getValue().getCoordinates().x, entry1.getValue().getCoordinates().y, squareSize, squareSize);
+            }
+            else {
+                g2.setColor(Color.PINK);
+                g2.fillRect(entry1.getValue().getCoordinates().x, entry1.getValue().getCoordinates().y, squareSize, squareSize);
+            }
+
+        }
         g2.setColor(Color.RED);
         for (Bullet bullet : bullets) {
             g2.fillOval((int) bullet.getX(), (int) bullet.getY(), 10, 10);

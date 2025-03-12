@@ -3,9 +3,9 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
 public class CollisionManager {
-    private ArrayList<Shape> map;
+    private ArrayList<Block> map;
 
-    public CollisionManager(ArrayList<Shape> map) {
+    public CollisionManager(ArrayList<Block> map) {
         this.map = map;
     }
 

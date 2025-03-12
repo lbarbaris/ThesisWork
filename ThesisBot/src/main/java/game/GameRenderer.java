@@ -2,9 +2,16 @@ package game;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import bullets.Gun;
+import map.paths.PathfindingAbstractClass;
+import map.paths.WaveAlgorithm;
+import network.Enemy;
+import network.NetworkHandler;
 import player.Player;
 import bullets.Bullet;
 import map.MapCreator;
@@ -18,15 +25,20 @@ public class GameRenderer {
     private final MapCreator mapCreator;
     private final MovementManager playerMovementManager;
     private final int squareSize;
+    private final PathfindingAbstractClass pathFindingAbstractClass;
+    private final NetworkHandler networkHandler;
+
 
     public GameRenderer(PlayerCameraManager playerCameraManager, Player targetPlayer, CopyOnWriteArrayList<Bullet> bullets,
-                        MapCreator mapCreator, MovementManager playerMovementManager, int squareSize) {
+                        MapCreator mapCreator, MovementManager playerMovementManager, int squareSize, PathfindingAbstractClass pathFindingAbstractClass, NetworkHandler networkHandler) {
         this.playerCameraManager = playerCameraManager;
         this.targetPlayer = targetPlayer;
         this.bullets = bullets;
         this.mapCreator = mapCreator;
         this.playerMovementManager = playerMovementManager;
         this.squareSize = squareSize;
+        this.pathFindingAbstractClass = pathFindingAbstractClass;
+        this.networkHandler = networkHandler;
     }
 
     public void render(Graphics g, JComponent component, boolean targetHit, long targetHitTime, Player player) {
@@ -46,6 +58,21 @@ public class GameRenderer {
 
         g2.setColor(Color.BLUE);
         g2.fillRect(playerMovementManager.getX(), playerMovementManager.getY(), squareSize, squareSize);
+
+        HashMap<String, Enemy> coords = networkHandler.getPlayerCoords();
+
+
+        for (Map.Entry<String, Enemy> entry1: coords.entrySet()){
+            if (entry1.getValue().isBot()){
+                g2.setColor(Color.GREEN);
+                g2.fillRect(entry1.getValue().getCoordinates().x, entry1.getValue().getCoordinates().y, squareSize, squareSize);
+            }
+            else {
+                g2.setColor(Color.PINK);
+                g2.fillRect(entry1.getValue().getCoordinates().x, entry1.getValue().getCoordinates().y, squareSize, squareSize);
+            }
+
+        }
 
         g2.setColor(Color.RED);
         for (Bullet bullet : bullets) {
@@ -91,5 +118,14 @@ public class GameRenderer {
         int textY = component.getHeight() - textHeight / 2;
 
         g2.drawString(ammoText, textX, textY);
+
+
+        // Отрисовка пути
+        LinkedList<Point> path = pathFindingAbstractClass.getPath();
+        g2.setColor(Color.CYAN);
+        for (Point p : path) {
+            g2.fillRect(p.x * squareSize + squareSize / 4, p.y * squareSize + squareSize / 4,
+                    squareSize / 2, squareSize / 2);
+        }
     }
 }

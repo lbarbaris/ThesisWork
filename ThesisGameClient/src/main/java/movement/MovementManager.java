@@ -7,10 +7,13 @@ import utils.KeyboardController;
 
 import java.awt.*;
 import java.util.LinkedList;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class MovementManager {
     private final KeyboardController keyboardController;
-    private final LinkedList <MovementCommand> commandHistory = new LinkedList<>();
+    private final Queue <MovementCommand> commandHistory = new ConcurrentLinkedQueue<>();
     private final Player player;
     private final PlayerCameraManager playerCameraManager;
     private final CollisionManager collisionManager;
@@ -89,16 +92,9 @@ public class MovementManager {
     }
 
     public void applyServerData(int serverX, int serverY, long serverTimestamp){
-            x = serverX;
-            y = serverY;
+        x = serverX;
+        y = serverY;
 
-            // Переигрываем движения, которые сервер ещё не обработал
-            for (MovementCommand command : commandHistory) {
-                if (command.timestamp > serverTimestamp) {
-                    x += command.dx;
-                    y += command.dy;
-                }
-            }
 
         // Очищаем обработанные сервером команды
         commandHistory.removeIf(cmd -> cmd.timestamp <= serverTimestamp);

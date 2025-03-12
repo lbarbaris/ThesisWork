@@ -1,26 +1,27 @@
 package movement;
 
+import map.cells.Cell;
 import player.Player;
 import player.PlayerCameraManager;
 import utils.CollisionManager;
-import utils.KeyboardController;
 
 import java.awt.*;
 import java.util.LinkedList;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class MovementManager {
-    private final KeyboardController keyboardController;
-    private final LinkedList <MovementCommand> commandHistory = new LinkedList<>();
+    private final Queue<MovementCommand> commandHistory = new ConcurrentLinkedQueue<>();
     private final Player player;
     private final PlayerCameraManager playerCameraManager;
     private final CollisionManager collisionManager;
     private final int squareSize;
     private final int mapWidth, mapHeight;
+    private LinkedList<Point> botPath = new LinkedList<>();
 
     private int x, dx, y, dy; // Локальные координаты
 
     public MovementManager(
-            KeyboardController keyboardController,
             int x, int y,
             Player player,
             PlayerCameraManager playerCameraManager,
@@ -29,7 +30,6 @@ public class MovementManager {
             int mapWidth,
             int mapHeight){
 
-        this.keyboardController = keyboardController;
         this.player = player;
         this.playerCameraManager = playerCameraManager;
         this.collisionManager = collisionManager;
@@ -41,37 +41,33 @@ public class MovementManager {
 
     }
 
-
-
-
     public void addCommand(){
         commandHistory.add(new MovementCommand(dx, dy, System.currentTimeMillis()));
     }
 
-
     public void move() {
-        int speed = 5;
-
+        int speed = 2;
         dx = 0;
         dy = 0;
 
-        // Предсказание
-        for (int i = 0; i < speed; i++) {
-            int nextX = x;
-            int nextY = y;
+       if (!botPath.isEmpty() ) {
+            Point nextPoint = botPath.getFirst();
+            int targetX = nextPoint.x * squareSize;
+            int targetY = nextPoint.y * squareSize;
 
-            if (keyboardController.isUp()) dy = -1;
-            if (keyboardController.isDown()) dy = 1;
-            if (keyboardController.isLeft()) dx = -1;
-            if (keyboardController.isRight()) dx = 1;
+            if (x < targetX) dx = 1;
+            if (x > targetX) dx = -1;
+            if (y < targetY) dy = 1;
+            if (y > targetY) dy = -1;
 
-            if (dx != 0 && dy != 0) {
-                nextX += (int) (dx * 2 / Math.sqrt(2));
-                nextY += (int) (dy * 2 / Math.sqrt(2));
-            } else {
-                nextX += dx;
-                nextY += dy;
+            if (x == targetX && y == targetY) {
+                botPath.removeFirst();
             }
+        }
+
+        for (int i = 0; i < speed; i++) {
+            int nextX = x + dx;
+            int nextY = y + dy;
 
             nextX = Math.max(0, Math.min(nextX, mapWidth - squareSize));
             nextY = Math.max(0, Math.min(nextY, mapHeight - squareSize));
@@ -82,26 +78,20 @@ public class MovementManager {
             }
         }
 
-        // Обновляем координаты игрока и камеры
         player.setPosition(x, y);
         playerCameraManager.updateCamera(x, y);
-        player.setCameraPosition(playerCameraManager.getCameraX(), playerCameraManager.getCameraY());
     }
 
     public void applyServerData(int serverX, int serverY, long serverTimestamp){
-            x = serverX;
-            y = serverY;
-
-            // Переигрываем движения, которые сервер ещё не обработал
-            for (MovementCommand command : commandHistory) {
-                if (command.timestamp > serverTimestamp) {
-                    x += command.dx;
-                    y += command.dy;
-                }
-            }
+        x = serverX;
+        y = serverY;
 
         // Очищаем обработанные сервером команды
         commandHistory.removeIf(cmd -> cmd.timestamp <= serverTimestamp);
+    }
+
+    public void setPath(LinkedList<Point> path) {
+        this.botPath = path;
     }
 
     public int[] getCoords(){
@@ -114,5 +104,9 @@ public class MovementManager {
 
     public int getY(){
         return y;
+    }
+
+    public Point getCell(){
+        return new Cell(x, y);
     }
 }

@@ -3,9 +3,14 @@ package game;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import map.cells.Cell;
+import map.paths.PathfindingAbstractClass;
+import map.paths.WaveAlgorithm;
+import network.Enemy;
 import network.NetworkHandler;
 import player.Player;
 import bullets.Bullet;
@@ -14,7 +19,6 @@ import map.MapCreator;
 import bullets.Gun;
 import movement.MovementManager;
 import utils.CollisionManager;
-import utils.KeyboardController;
 import player.PlayerCameraManager;
 
 public class GameController extends JPanel {
@@ -25,6 +29,7 @@ public class GameController extends JPanel {
     private long targetHitTime;
     private final MovementManager playerMovementManager;
     private final NetworkHandler networkHandler;
+    private final PathfindingAbstractClass pathFinding;
 
     private final int squareSize = 20;
     private final MapCreator mapCreator;
@@ -34,6 +39,7 @@ public class GameController extends JPanel {
     private final BulletManager bulletManager;
     private final Player player;
     private final GameRenderer gameRenderer;
+    private int distanceCounter;
 
     public GameController() throws IOException {
         playerCameraManager = new PlayerCameraManager(1000, 1000);
@@ -43,28 +49,41 @@ public class GameController extends JPanel {
         targetHit = false;
 
         mapCreator = new MapCreator((short) 3);
-        System.out.println(
-                Arrays.deepToString(mapCreator.generateMapMatrix())
-                        .replace("], ", "]\n")  // Перенос строки после каждой строки массива
-                        .replace("[[", "[\n[")  // Перенос строки после первой скобки
-                        .replace("]]", "]\n]")  // Перенос строки перед закрывающей скобкой
-        );
+
+
+        pathFinding = new WaveAlgorithm(mapCreator);
         collisionManager = new CollisionManager(mapCreator.getMap());
         setFocusable(true);
 
         Gun defaultGun = new Gun(1000, 12.0, 3.0, 100, 2500);
         player = new Player(50, 50, defaultGun);
-        KeyboardController keyboardController = new KeyboardController(player);
-        addKeyListener(keyboardController);
 
         bulletManager = new BulletManager(player, bullets, this);
         bulletManager.start();
-        playerMovementManager = new MovementManager(keyboardController, 50, 50, player, playerCameraManager, collisionManager, squareSize, 1500, 1200);
+        playerMovementManager = new MovementManager(50, 50, player, playerCameraManager, collisionManager, squareSize, 1500, 1200);
 
         networkHandler = new NetworkHandler("localhost", 12345, playerMovementManager);
         networkHandler.startNetworkThreads();
 
-        gameRenderer = new GameRenderer(playerCameraManager, targetPlayer, bullets, mapCreator, playerMovementManager, squareSize);
+        gameRenderer = new GameRenderer(playerCameraManager, targetPlayer, bullets, mapCreator, playerMovementManager,  squareSize, pathFinding, networkHandler);
+        long time = System.currentTimeMillis();
+
+        long time2 = System.currentTimeMillis();
+        System.out.println("Algorithm time:" + (time2 - time));
+
+        distanceCounter = 0;
+
+
+/*        System.out.println(
+                Arrays.deepToString(pathFinding.getDistances())
+                        .replace("], ", "]\n")  // Перенос строки после каждой строки массива
+                        .replace("[[", "[\n[")  // Перенос строки после первой скобки
+                        .replace("]]", "]\n]")  // Перенос строки перед закрывающей скобкой
+        );*/
+
+
+
+
     }
 
     public void setupShootingLoop(){
@@ -89,6 +108,28 @@ public class GameController extends JPanel {
                 targetHitTime = System.currentTimeMillis();
             }
         });
+
+        HashMap<String, Enemy> coords = networkHandler.getPlayerCoords();
+
+        if (distanceCounter % 150 == 0 && !coords.isEmpty()) {
+
+            double distance = Double.MAX_VALUE;
+            String closestPlayerName = "";
+
+
+            for (Map.Entry<String, Enemy> entry1 : coords.entrySet()) {
+                double checkDistance = playerMovementManager.getCell().distance(new Cell(entry1.getValue().getCoordinates()));
+                if (checkDistance < distance && !entry1.getValue().isBot()) {
+                    distance = checkDistance;
+                    closestPlayerName = entry1.getKey();
+                }
+            }
+
+            pathFinding.findPath(new Cell(playerMovementManager.getX(), playerMovementManager.getY()), new Cell(coords.get(closestPlayerName).getCoordinates()));
+            playerMovementManager.setPath(pathFinding.getPath());
+            //;
+        }
+        distanceCounter++;
     }
 
     @Override
