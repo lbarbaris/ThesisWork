@@ -6,12 +6,14 @@ public class Gun {
     private final double accuracy;
     private final int magazineSize;
     private final long reloadTime;
+    private final short damage;
 
     private int currentAmmo;
     private boolean reloading;
     private long reloadStartTime;
 
-    public Gun(long delay, double speed, double accuracy, int magazineSize, long reloadTime) {
+    public Gun(long delay, double speed, double accuracy, int magazineSize, long reloadTime, short damage) {
+        this.damage = damage;
         this.delay = delay;
         this.speed = speed;
         this.accuracy = accuracy;
@@ -81,5 +83,9 @@ public class Gun {
         if (canShoot()) {
             currentAmmo--;
         }
+    }
+
+    public short getDamage(){
+        return damage;
     }
 }

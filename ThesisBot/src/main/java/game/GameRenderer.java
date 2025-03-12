@@ -48,19 +48,53 @@ public class GameRenderer {
         // Сохраняем состояние графического контекста
         g2.translate(-playerCameraManager.getCameraX(), -playerCameraManager.getCameraY());
 
-        // Отрисовка игровых объектов с учетом камеры
-        for (Shape shape : mapCreator.getMap()) {
-            g2.fillRect(shape.getBounds().x, shape.getBounds().y, shape.getBounds().width, shape.getBounds().height);
+        renderMap(g2, mapCreator);
+
+        renderMapName(g2, mapCreator);
+
+        renderPlayer(g2
+        );
+        renderEnemies(g2);
+
+        renderBullets(g2);
+
+        renderTarget(g2, targetHit, targetHitTime);
+
+        g2.translate(playerCameraManager.getCameraX(), playerCameraManager.getCameraY());
+
+        renderReloadingBar(g2, player);
+
+        renderGunInterface(g2, component, player);
+
+        renderHP(g2, component, player);
+
+
+
+    }
+
+    public void renderTarget(Graphics2D g2, boolean targetHit, long targetHitTime){
+        if (targetHit && System.currentTimeMillis() - targetHitTime < 100) {
+            g2.setColor(Color.RED);
+        } else {
+            if (targetPlayer.getHp() <= 50){
+                g2.setColor(Color.MAGENTA);
+            }
+            else{
+                g2.setColor(Color.ORANGE);
+            }
         }
+        g2.fillRect((int) targetPlayer.getX(), (int) targetPlayer.getY(), squareSize, squareSize);
+    }
 
-        g2.setColor(Color.GREEN);
-        g2.drawString(mapCreator.getMapName(), 10 + playerCameraManager.getCameraX(), 20 + playerCameraManager.getCameraY());
+    public void renderBullets(Graphics2D g2){
+        g2.setColor(Color.RED);
+        for (Bullet bullet : bullets) {
+            g2.fillOval((int) bullet.getX(), (int) bullet.getY(), 10, 10);
+        }
+    }
 
-        g2.setColor(Color.BLUE);
-        g2.fillRect(playerMovementManager.getX(), playerMovementManager.getY(), squareSize, squareSize);
-
+    public void renderEnemies(Graphics2D g2){
         HashMap<String, Enemy> coords = networkHandler.getPlayerCoords();
-
 
         for (Map.Entry<String, Enemy> entry1: coords.entrySet()){
             if (entry1.getValue().isBot()){
@@ -71,25 +105,26 @@ public class GameRenderer {
                 g2.setColor(Color.PINK);
                 g2.fillRect(entry1.getValue().getCoordinates().x, entry1.getValue().getCoordinates().y, squareSize, squareSize);
             }
-
         }
+    }
 
+    public void renderPlayer(Graphics2D g2){
+        g2.setColor(Color.BLUE);
+        g2.fillRect(playerMovementManager.getX(), playerMovementManager.getY(), squareSize, squareSize);
+    }
+
+    public void renderHP(Graphics2D g2, JComponent component, Player player){
         g2.setColor(Color.RED);
-        for (Bullet bullet : bullets) {
-            g2.fillOval((int) bullet.getX(), (int) bullet.getY(), 10, 10);
-        }
 
-        // Отрисовка мишени
-        if (targetHit && System.currentTimeMillis() - targetHitTime < 100) {
-            g2.setColor(Color.RED);
-        } else {
-            g2.setColor(Color.ORANGE);
-        }
-        g2.fillRect((int) targetPlayer.getX(), (int) targetPlayer.getY(), squareSize, squareSize);
+        int textWidth = g2.getFontMetrics().stringWidth(player.getHpString());
+        int textHeight = g2.getFontMetrics().getHeight();
+        int textX = 5 + textWidth; // Используем размеры компонента
+        int textY = component.getHeight() - textHeight / 2;
 
-        g2.translate(playerCameraManager.getCameraX(), playerCameraManager.getCameraY());
+        g2.drawString(player.getHpString(), textX, textY);
+    }
 
-        // Отрисовка элементов интерфейса (без смещения камеры)
+    public void renderReloadingBar(Graphics2D g2, Player player){
         Gun gun = player.getGun();
         if (gun.isReloading()) {
             double progress = gun.getReloadProgress();
@@ -104,7 +139,10 @@ public class GameRenderer {
             g2.setColor(Color.GREEN);
             g2.fillRect(barX, barY, (int) (barWidth * progress), barHeight);
         }
+    }
 
+    public void renderGunInterface(Graphics2D g2, JComponent component, Player player){
+        Gun gun = player.getGun();
         int currentAmmo = gun.getCurrentAmmo();
         int maxAmmo = gun.getMagazineSize();
 
@@ -118,9 +156,20 @@ public class GameRenderer {
         int textY = component.getHeight() - textHeight / 2;
 
         g2.drawString(ammoText, textX, textY);
+    }
 
+    public void renderMapName(Graphics2D g2, MapCreator mapCreator){
+        g2.setColor(Color.GREEN);
+        g2.drawString(mapCreator.getMapName(), 10 + playerCameraManager.getCameraX(), 20 + playerCameraManager.getCameraY());
+    }
 
-        // Отрисовка пути
+    public void renderMap(Graphics2D g2, MapCreator mapCreator){
+        for (Shape shape : mapCreator.getMap()) {
+            g2.fillRect(shape.getBounds().x, shape.getBounds().y, shape.getBounds().width, shape.getBounds().height);
+        }
+    }
+
+    public void renderPath(Graphics2D g2, MapCreator mapCreator){
         LinkedList<Point> path = pathFindingAbstractClass.getPath();
         g2.setColor(Color.CYAN);
         for (Point p : path) {

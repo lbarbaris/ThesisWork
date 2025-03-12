@@ -15,6 +15,14 @@ public class Player {
         this.hp = 100;
     }
 
+    public short getHp(){
+        return hp;
+    }
+
+    public String getHpString(){
+        return String.valueOf(hp);
+    }
+
     public void doDamage(short damage){
         hp = (short) (hp - damage);
     }

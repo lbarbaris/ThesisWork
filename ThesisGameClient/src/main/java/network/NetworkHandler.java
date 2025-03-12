@@ -82,7 +82,7 @@ public class NetworkHandler {
 
 
         for (int i = 3; i < parts.length - 3; i += 4){
-            PlayerCoords.put(parts[i + 2], new Enemy(Boolean.parseBoolean(parts[i + 3]), Integer.parseInt(parts[i]), Integer.parseInt(parts[i + 1])));
+            PlayerCoords.put(parts[i + 2], new Enemy(Boolean.parseBoolean(parts[i + 3]), Integer.parseInt(parts[i]), Integer.parseInt(parts[i + 1]), (short) 100));
         }
 
     }

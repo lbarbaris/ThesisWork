@@ -2,15 +2,38 @@ package player;
 
 import bullets.Gun;
 
+import java.awt.*;
+
 public class Player {
-    private double x, y; // Позиция игрока
+    private int x, y; // Позиция игрока
     private int cameraX, cameraY; // Камера
     private Gun gun; // Текущее оружие игрока
 
-    public Player(double startX, double startY, Gun gun) {
+
+
+    private int hp;
+
+    public Player(int startX, int startY, Gun gun) {
         this.x = startX;
         this.y = startY;
         this.gun = gun;
+        this.hp = 100;
+    }
+
+    public int getHp(){
+        return hp;
+    }
+
+    public String getHpString(){
+        return String.valueOf(hp);
+    }
+
+    public void doDamage(int damage){
+        hp -= damage;
+    }
+
+    public void heal (int heal){
+        hp += heal;
     }
 
     public double getX() {
@@ -21,7 +44,7 @@ public class Player {
         return y;
     }
 
-    public void setPosition(double x, double y) {
+    public void setPosition(int x, int y) {
         this.x = x;
         this.y = y;
     }
@@ -34,6 +57,11 @@ public class Player {
         return cameraY;
     }
 
+    public void respawn(int x, int y, int hp){
+        heal(hp);
+        setPosition(x, y);
+    }
+
     public void setCameraPosition(int cameraX, int cameraY) {
         this.cameraX = cameraX;
         this.cameraY = cameraY;
@@ -41,6 +69,10 @@ public class Player {
 
     public Gun getGun() {
         return gun;
+    }
+
+    public void setHp(int hp) {
+        this.hp = hp;
     }
 }
 

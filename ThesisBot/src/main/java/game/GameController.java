@@ -23,7 +23,7 @@ import player.PlayerCameraManager;
 
 public class GameController extends JPanel {
     private final PlayerCameraManager playerCameraManager;
-    private final Player targetPlayer;
+    private Player targetPlayer;
     private final CollisionManager collisionManager;
     private boolean targetHit;
     private long targetHitTime;
@@ -44,7 +44,7 @@ public class GameController extends JPanel {
     public GameController() throws IOException {
         playerCameraManager = new PlayerCameraManager(1000, 1000);
 
-        Gun targetGun = new Gun(100, 8.0, 5.0, 10, 3000);
+        Gun targetGun = new Gun(100, 8.0, 5.0, 10, 3000, (short) 10);
         targetPlayer = new Player(200, 200, targetGun);
         targetHit = false;
 
@@ -55,7 +55,7 @@ public class GameController extends JPanel {
         collisionManager = new CollisionManager(mapCreator.getMap());
         setFocusable(true);
 
-        Gun defaultGun = new Gun(1000, 12.0, 3.0, 100, 2500);
+        Gun defaultGun = new Gun(1000, 12.0, 3.0, 100, 2500, (short) 10);
         player = new Player(50, 50, defaultGun);
 
         bulletManager = new BulletManager(player, bullets, this);
@@ -106,6 +106,12 @@ public class GameController extends JPanel {
             if (bulletManager.isBulletHitPlayer(bullet, targetPlayer, squareSize)) {
                 targetHit = true;
                 targetHitTime = System.currentTimeMillis();
+                targetPlayer.doDamage(player.getGun().getDamage());
+                if (targetPlayer.getHp() <= 0){
+                    Gun targetGun = targetPlayer.getGun();
+                    targetPlayer = new Player(200, 200, targetGun);
+                    targetHit = false;
+                }
             }
         });
 
