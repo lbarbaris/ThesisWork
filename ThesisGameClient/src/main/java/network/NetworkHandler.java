@@ -34,7 +34,6 @@ public class NetworkHandler {
     }
 
     public void startNetworkThreads() {
-        // Поток отправки данных
         networkThreads.execute(() -> {
             while (running) {
                 try {
@@ -82,9 +81,20 @@ public class NetworkHandler {
 
 
         for (int i = 3; i < parts.length - 3; i += 4){
-            PlayerCoords.put(parts[i + 2], new Enemy(Boolean.parseBoolean(parts[i + 3]), Integer.parseInt(parts[i]), Integer.parseInt(parts[i + 1]), (short) 100));
+            int x = Integer.parseInt(parts[i]);
+            int y = Integer.parseInt(parts[i + 1]);
+            String id = parts[i + 2];
+            boolean bot = Boolean.parseBoolean(parts[i + 3]);
+
+            Enemy enemy = PlayerCoords.getOrDefault(id, new Enemy(bot, x, y, 100, serverTimeStamp));
+            enemy.addFrame(x, y, serverTimeStamp);
+            PlayerCoords.put(id, enemy);
         }
 
+    }
+
+    public void putToPlayerCoords(Enemy enemy){
+        PlayerCoords.put("target", enemy);
     }
 
     public HashMap<String, Enemy> getPlayerCoords(){

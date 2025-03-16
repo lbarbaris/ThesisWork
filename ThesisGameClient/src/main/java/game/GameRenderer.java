@@ -2,42 +2,44 @@ package game;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
+
 
 import bullets.Gun;
 import network.Enemy;
 import network.NetworkHandler;
 import player.Player;
 import bullets.Bullet;
+import bullets.BulletManager;
 import map.MapCreator;
 import player.PlayerCameraManager;
 import movement.MovementManager;
+import utils.Constants;
 
 public class GameRenderer {
     private final PlayerCameraManager playerCameraManager;
-    private final Player targetPlayer;
-    private final CopyOnWriteArrayList<Bullet> bullets;
+    private final Enemy targetEnemy;
     private final MapCreator mapCreator;
     private final MovementManager playerMovementManager;
     private final int squareSize;
     private final NetworkHandler networkHandler;
+    private final BulletManager bulletManager;
+    private long lastShot;
 
-    public GameRenderer(PlayerCameraManager playerCameraManager, Player targetPlayer, CopyOnWriteArrayList<Bullet> bullets,
-                        MapCreator mapCreator, MovementManager playerMovementManager, NetworkHandler networkHandler, int squareSize) {
+    public GameRenderer(PlayerCameraManager playerCameraManager, Enemy targetEnemy,
+                        MapCreator mapCreator, MovementManager playerMovementManager, NetworkHandler networkHandler, int squareSize, BulletManager bulletManager) {
         this.networkHandler = networkHandler;
+        this.bulletManager = bulletManager;
         this.playerCameraManager = playerCameraManager;
-        this.targetPlayer = targetPlayer;
-        this.bullets = bullets;
+        this.targetEnemy = targetEnemy;
         this.mapCreator = mapCreator;
         this.playerMovementManager = playerMovementManager;
         this.squareSize = squareSize;
     }
 
-    public void render(Graphics g, JComponent component, boolean targetHit, long targetHitTime, Player player) {
+    public void render(Graphics g, JComponent component, Player player) {
         Graphics2D g2 = (Graphics2D) g;
         g2.setFont(new Font("Arial", Font.BOLD, 20));
 
@@ -52,9 +54,7 @@ public class GameRenderer {
 
         renderEnemies(g2);
 
-        renderBullets(g2);
-
-        renderTarget(g2, targetHit, targetHitTime);
+        renderInstantShot(g2, player, component);
 
         g2.translate(playerCameraManager.getCameraX(), playerCameraManager.getCameraY());
 
@@ -66,38 +66,46 @@ public class GameRenderer {
     }
 
     private void renderTarget(Graphics2D g2, boolean targetHit, long targetHitTime){
+        //System.out.println(targetPlayer);
         if (targetHit && System.currentTimeMillis() - targetHitTime < 100) {
             g2.setColor(Color.RED);
         } else {
-            if (targetPlayer.getHp() <= 50){
+            if (targetEnemy.getHp() <= 50){
                 g2.setColor(Color.MAGENTA);
             }
             else{
                 g2.setColor(Color.ORANGE);
             }
         }
-        g2.fillRect((int) targetPlayer.getX(), (int) targetPlayer.getY(), squareSize, squareSize);
+        g2.fillRect(targetEnemy.getCoordinates().x, targetEnemy.getCoordinates().y, squareSize, squareSize);
     }
 
-    private void renderBullets(Graphics2D g2){
-        g2.setColor(Color.RED);
-        for (Bullet bullet : bullets) {
-            g2.fillOval((int) bullet.getX(), (int) bullet.getY(), 10, 10);
-        }
-    }
+
 
     private void renderEnemies(Graphics2D g2){
         HashMap<String, Enemy> coords = networkHandler.getPlayerCoords();
+        long renderTime = System.currentTimeMillis() - Constants.INTERPOLATION_DELAY_MS;
 
-        for (Map.Entry<String, Enemy> entry1: coords.entrySet()){
-            if (entry1.getValue().isBot()){
-                g2.setColor(Color.GREEN);
-                g2.fillRect(entry1.getValue().getCoordinates().x, entry1.getValue().getCoordinates().y, squareSize, squareSize);
+        HashMap<Enemy, Long> hitTimes = bulletManager.getEnemyHitTimes();
+
+
+
+        for (Map.Entry<String, Enemy> entry : coords.entrySet()) {
+            Enemy enemy = entry.getValue();
+            Point interpPos = enemy.getInterpolatedPosition(renderTime);
+            if (!hitTimes.isEmpty() && hitTimes.get(entry.getValue()) != null && (System.currentTimeMillis() - hitTimes.get(entry.getValue()) < 100)){
+                g2.setColor(Color.RED);
             }
             else {
-                g2.setColor(Color.PINK);
-                g2.fillRect(entry1.getValue().getCoordinates().x, entry1.getValue().getCoordinates().y, squareSize, squareSize);
+                if (enemy.isBot()) {
+                    g2.setColor(Color.GREEN);
+                } else {
+                    g2.setColor(Color.PINK);
+                }
             }
+
+
+            g2.fillRect(interpPos.x, interpPos.y, squareSize, squareSize);
         }
     }
 
@@ -162,4 +170,24 @@ public class GameRenderer {
         }
     }
 
+    private void renderInstantShot(Graphics2D g2, Player player, JComponent component) {
+        if (bulletManager.getOneShot()) {
+            lastShot = System.currentTimeMillis();
+        }
+        if (System.currentTimeMillis() - lastShot <= 50){
+            Point hitPoint = bulletManager.getLastHitPoint();
+            if (hitPoint == null) return;
+
+            g2.setStroke(new BasicStroke(4)); // Здесь задаём толщину (например, 4 пикселя)
+
+            g2.setColor(Color.YELLOW);
+            g2.drawLine(
+                    (int) (player.getX() + squareSize / 2.0),
+                    (int) (player.getY() + squareSize / 2.0),
+                    hitPoint.x,
+                    hitPoint.y
+            );
+        }
+
+    }
 }

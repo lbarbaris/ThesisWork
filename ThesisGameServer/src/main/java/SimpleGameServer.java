@@ -66,7 +66,6 @@ public class SimpleGameServer {
                 }
 
 
-
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -125,16 +124,5 @@ public class SimpleGameServer {
         }
     }
 
-    static class PlayerState {
-        int x, y;
-        long lastProcessedTimestamp;
-        boolean isBot;
 
-        PlayerState(int x, int y, boolean isBot) {
-            this.x = x;
-            this.y = y;
-            this.isBot = isBot;
-            this.lastProcessedTimestamp = System.currentTimeMillis();
-        }
-    }
 }

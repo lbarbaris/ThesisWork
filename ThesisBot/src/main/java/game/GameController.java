@@ -5,6 +5,7 @@ import java.awt.*;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import map.cells.Cell;
@@ -34,7 +35,7 @@ public class GameController extends JPanel {
     private final int squareSize = 20;
     private final MapCreator mapCreator;
 
-    private final CopyOnWriteArrayList<Bullet> bullets = new CopyOnWriteArrayList<>();
+    private final ConcurrentLinkedQueue<Bullet> bullets = new ConcurrentLinkedQueue<>();
 
     private final BulletManager bulletManager;
     private final Player player;
@@ -62,7 +63,7 @@ public class GameController extends JPanel {
         bulletManager.start();
         playerMovementManager = new MovementManager(50, 50, player, playerCameraManager, collisionManager, squareSize, 1500, 1200);
 
-        networkHandler = new NetworkHandler("localhost", 12345, playerMovementManager);
+        networkHandler = new NetworkHandler("localhost", 12345, playerMovementManager, bulletManager);
         networkHandler.startNetworkThreads();
 
         gameRenderer = new GameRenderer(playerCameraManager, targetPlayer, bullets, mapCreator, playerMovementManager,  squareSize, pathFinding, networkHandler);

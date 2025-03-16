@@ -29,7 +29,6 @@ public class MapCreator {
                 for (int x = 100; x <= 800; x += 400) {
                     map.add(new Block(x, 100));
                 }
-                map.add(new Block(200, 200)); // Уже кратно 20
                 map.add(new Block(160, 200)); // Уже кратно 20
                 map.add(new Block(120, 200)); // Уже кратно 20
                 map.add(new Block(80, 200)); // Уже кратно 20

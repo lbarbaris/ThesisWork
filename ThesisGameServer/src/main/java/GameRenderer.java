@@ -4,9 +4,9 @@ import java.util.Map;
 
 public class GameRenderer extends JPanel {
     private final MapCreator mapCreator;
-    private final Map<String, SimpleGameServer.PlayerState> playerStates;
+    private final Map<String, PlayerState> playerStates;
 
-    public GameRenderer(MapCreator mapCreator, Map<String, SimpleGameServer.PlayerState> playerStates) {
+    public GameRenderer(MapCreator mapCreator, Map<String, PlayerState> playerStates) {
         this.mapCreator = mapCreator;
         this.playerStates = playerStates;
     }
@@ -30,17 +30,23 @@ public class GameRenderer extends JPanel {
     }
 
     private void renderPlayerStates(Graphics2D g2){
-        for (SimpleGameServer.PlayerState state : playerStates.values()) {
+        long renderTime = getRenderTimestamp();
+
+        for (PlayerState state : playerStates.values()) {
+            Point interpolated = state.getInterpolatedPosition(renderTime);
+
             if (!state.isBot){
                 g2.setColor(Color.BLUE);
-                g2.fillRect(state.x, state.y, 20, 20);
-            }
-            else {
+            } else {
                 g2.setColor(Color.GREEN);
-                g2.fillRect(state.x, state.y, 20, 20);
             }
 
+            g2.fillRect(interpolated.x, interpolated.y, 20, 20);
         }
+    }
+
+    private long getRenderTimestamp() {
+        return System.currentTimeMillis() - 100; // ≈100 мс задержка для интерполяции
     }
 }
 

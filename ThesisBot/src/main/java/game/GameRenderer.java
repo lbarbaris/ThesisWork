@@ -5,11 +5,11 @@ import java.awt.*;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import bullets.Gun;
 import map.paths.PathfindingAbstractClass;
-import map.paths.WaveAlgorithm;
 import network.Enemy;
 import network.NetworkHandler;
 import player.Player;
@@ -21,7 +21,7 @@ import movement.MovementManager;
 public class GameRenderer {
     private final PlayerCameraManager playerCameraManager;
     private final Player targetPlayer;
-    private final CopyOnWriteArrayList<Bullet> bullets;
+    private final ConcurrentLinkedQueue<Bullet> bullets;
     private final MapCreator mapCreator;
     private final MovementManager playerMovementManager;
     private final int squareSize;
@@ -29,7 +29,7 @@ public class GameRenderer {
     private final NetworkHandler networkHandler;
 
 
-    public GameRenderer(PlayerCameraManager playerCameraManager, Player targetPlayer, CopyOnWriteArrayList<Bullet> bullets,
+    public GameRenderer(PlayerCameraManager playerCameraManager, Player targetPlayer, ConcurrentLinkedQueue<Bullet> bullets,
                         MapCreator mapCreator, MovementManager playerMovementManager, int squareSize, PathfindingAbstractClass pathFindingAbstractClass, NetworkHandler networkHandler) {
         this.playerCameraManager = playerCameraManager;
         this.targetPlayer = targetPlayer;

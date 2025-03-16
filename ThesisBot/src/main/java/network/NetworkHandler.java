@@ -1,8 +1,8 @@
 package network;
 
+import bullets.BulletManager;
 import movement.MovementManager;
 
-import java.awt.*;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class NetworkHandler {
+    private final BulletManager bulletManager;
     private final DatagramSocket socket;
     private final InetAddress serverAddress;
     private final MovementManager movementManager;
@@ -21,7 +22,8 @@ public class NetworkHandler {
     private volatile boolean running = true;
     private HashMap<String, Enemy> PlayerCoords;
 
-    public NetworkHandler(String serverHost, int serverPort, MovementManager movementManager) throws IOException {
+    public NetworkHandler(String serverHost, int serverPort, MovementManager movementManager, BulletManager bulletManager) throws IOException {
+        this.bulletManager = bulletManager;
         this.socket = new DatagramSocket();
         this.serverAddress = InetAddress.getByName(serverHost);
         this.serverPort = serverPort;

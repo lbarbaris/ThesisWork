@@ -7,16 +7,17 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class BulletManager extends Thread {
-    private final List<Bullet> bullets;
+    private final ConcurrentLinkedQueue<Bullet> bullets;
     private final JPanel panel;
     private final Player player;
 
     private volatile boolean shooting;
     private Thread shootingThread;
 
-    public BulletManager(Player player, List<Bullet> bullets, JPanel panel) {
+    public BulletManager(Player player, ConcurrentLinkedQueue<Bullet> bullets, JPanel panel) {
         this.player = player;
         this.bullets = bullets;
         this.panel = panel;
@@ -72,9 +73,8 @@ public class BulletManager extends Thread {
                 double speedX = Math.cos(angle) * gun.getSpeed();
                 double speedY = Math.sin(angle) * gun.getSpeed();
 
-                synchronized (bullets) {
+
                     bullets.add(new Bullet(startX, startY, speedX, speedY));
-                }
 
                 gun.shoot();
 

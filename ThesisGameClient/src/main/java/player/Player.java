@@ -2,14 +2,10 @@ package player;
 
 import bullets.Gun;
 
-import java.awt.*;
-
 public class Player {
     private int x, y; // Позиция игрока
     private int cameraX, cameraY; // Камера
     private Gun gun; // Текущее оружие игрока
-
-
 
     private int hp;
 
