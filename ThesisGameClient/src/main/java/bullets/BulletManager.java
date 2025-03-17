@@ -19,10 +19,10 @@ public class BulletManager extends Thread {
     private final JPanel panel;
     private final Player player;
     private final Enemy targetEnemy;
+
+
     private volatile boolean shooting;
     private volatile boolean oneShot = false;
-    private boolean targetHit;
-    private long targetHitTime;
     private volatile Point lastHitPoint;
     private Thread shootingThread;
     private HashMap<String, Enemy> playerCoords = null;
@@ -34,7 +34,6 @@ public class BulletManager extends Thread {
 
     public BulletManager(Player player, JPanel panel, Enemy targetEnemy, MapCreator mapCreator) {
         this.mapCreator = mapCreator;
-        this.targetHit = false;
         this.player = player;
         this.lastHitPoint = null;
         this.panel = panel;
@@ -42,23 +41,8 @@ public class BulletManager extends Thread {
         this.enemyHitTimes = new HashMap<>();
     }
 
-    @Override
-    public void run() {
-        panel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                shooting = true;
-                startShooting();
-            }
 
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                shooting = false;
-            }
-        });
-    }
-
-    private void startShooting() {
+    public void startShootingLoop() {
         if (shootingThread != null && shootingThread.isAlive()) return;
 
         shootingThread = new Thread(() -> {
@@ -70,9 +54,6 @@ public class BulletManager extends Thread {
                     gun.reload();
                     continue;
                 }
-
-
-
 
                 Point mouse = panel.getMousePosition();
                 if (mouse == null) return; // мышь вне панели
@@ -129,14 +110,6 @@ public class BulletManager extends Thread {
             return true;
         }
         return false;
-    }
-
-    public boolean isTargetHit() {
-        return targetHit;
-    }
-
-    public long getTargetHitTime() {
-        return targetHitTime;
     }
 
     private RaycastHit raycast(double angle) {
@@ -202,6 +175,15 @@ public class BulletManager extends Thread {
 
     public Point getLastHitPoint() {
         return lastHitPoint;
+    }
+
+
+    public boolean isShooting() {
+        return shooting;
+    }
+
+    public void setShooting(boolean shooting) {
+        this.shooting = shooting;
     }
 }
 

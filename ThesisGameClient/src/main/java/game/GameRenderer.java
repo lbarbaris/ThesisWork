@@ -4,14 +4,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 
 import bullets.Gun;
 import network.Enemy;
 import network.NetworkHandler;
 import player.Player;
-import bullets.Bullet;
 import bullets.BulletManager;
 import map.MapCreator;
 import player.PlayerCameraManager;
@@ -63,21 +61,6 @@ public class GameRenderer {
         renderGunInterface(g2, component, player);
 
         renderHP(g2, component, player);
-    }
-
-    private void renderTarget(Graphics2D g2, boolean targetHit, long targetHitTime){
-        //System.out.println(targetPlayer);
-        if (targetHit && System.currentTimeMillis() - targetHitTime < 100) {
-            g2.setColor(Color.RED);
-        } else {
-            if (targetEnemy.getHp() <= 50){
-                g2.setColor(Color.MAGENTA);
-            }
-            else{
-                g2.setColor(Color.ORANGE);
-            }
-        }
-        g2.fillRect(targetEnemy.getCoordinates().x, targetEnemy.getCoordinates().y, squareSize, squareSize);
     }
 
 

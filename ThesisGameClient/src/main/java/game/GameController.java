@@ -16,19 +16,19 @@ import movement.MovementManager;
 import utils.CollisionManager;
 import utils.KeyboardController;
 import player.PlayerCameraManager;
+import utils.MouseController;
 
 public class GameController extends JPanel {
     private final PlayerCameraManager playerCameraManager;
     private Enemy targetEnemy;
     private final CollisionManager collisionManager;
+    private final MouseController mouseController;
 
     private final MovementManager playerMovementManager;
     private final NetworkHandler networkHandler;
 
     private final int squareSize = 20;
     private final MapCreator mapCreator;
-
-    private final CopyOnWriteArrayList<Bullet> bullets = new CopyOnWriteArrayList<>();
 
     private final BulletManager bulletManager;
 
@@ -38,6 +38,7 @@ public class GameController extends JPanel {
 
     public GameController() throws IOException {
         playerCameraManager = new PlayerCameraManager(1000, 1000);
+
 
         targetEnemy = new Enemy(true, 200, 200, 100,  System.currentTimeMillis());
 
@@ -54,11 +55,12 @@ public class GameController extends JPanel {
         Gun defaultGun = new Gun(1000, 12.0, 3.0, 1, 1000, 1);
         player = new Player(50, 50, defaultGun);
         KeyboardController keyboardController = new KeyboardController(player);
+
         addKeyListener(keyboardController);
 
         bulletManager = new BulletManager(player, this, targetEnemy, mapCreator);
 
-
+        mouseController = new MouseController(this, bulletManager);
         playerMovementManager = new MovementManager(keyboardController, 50, 50, player, playerCameraManager, collisionManager, squareSize, 1500, 1200);
 
         networkHandler = new NetworkHandler("localhost", 12345, playerMovementManager);
