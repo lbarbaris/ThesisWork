@@ -42,14 +42,13 @@ public class SimpleGameServer {
                 String[] parts = data.split(",");
                 if (parts.length < 5) continue;
 
-                int dx = Integer.parseInt(parts[0]);
-                int dy = Integer.parseInt(parts[1]);
-                int clientX = Integer.parseInt(parts[2]);
-                int clientY = Integer.parseInt(parts[3]);
-                long timestamp = Long.parseLong(parts[4]);
-                boolean isBot = Boolean.parseBoolean(parts[5]);
+                int clientX = Integer.parseInt(parts[0]);
+                int clientY = Integer.parseInt(parts[1]);
+                long timestamp = Long.parseLong(parts[2]);
+                boolean isBot = Boolean.parseBoolean(parts[3]);
+                int hp = Integer.parseInt(parts[4]);
 
-                playerStates.putIfAbsent(playerKey, new PlayerState(clientX, clientY, isBot));
+                playerStates.putIfAbsent(playerKey, new PlayerState(clientX, clientY, isBot, hp));
 
                 PlayerState state = playerStates.get(playerKey);
                 int maxDistance = 5; // Максимально допустимый шаг

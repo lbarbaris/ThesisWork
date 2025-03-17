@@ -2,31 +2,27 @@ package network;
 
 public class Frame {
     private final int x;
-    private final int dx;
     private final int y;
-    private final int dy;
     private final boolean isBot;
+    private int hp;
 
-    public Frame(int[] movementData, boolean isBot) {
+    public Frame(int[] movementData, boolean isBot, int hp) {
         this.x = movementData[0];
-        this.dx = movementData[1];
         this.y = movementData[2];
-        this.dy = movementData[3];
         this.isBot = isBot;
+        this.hp = hp;
     }
 
     @Override
     public String toString() {
-        return dx +
-                "," +
-                dy +
-                "," +
-                x +
+        return x +
                 "," +
                 y +
                 "," +
                 System.currentTimeMillis() +
                 "," +
-                isBot;
+                isBot +
+                "," +
+                hp;
     }
 }

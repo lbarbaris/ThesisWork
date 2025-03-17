@@ -9,4 +9,5 @@ public class RaycastHit {
     public Enemy hitEnemy = null;
     public Point hitPoint = null;
     public double distance = Double.MAX_VALUE;
+
 }

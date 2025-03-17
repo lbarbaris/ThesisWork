@@ -1,17 +1,13 @@
 package network;
 
 import movement.MovementManager;
+import player.Player;
 
-import java.awt.*;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -24,8 +20,10 @@ public class NetworkHandler {
     private volatile boolean running = true;
     private final boolean isBot = false;
     private HashMap<String, Enemy> PlayerCoords;
+    private Player player;
 
-    public NetworkHandler(String serverHost, int serverPort, MovementManager movementManager) throws IOException {
+    public NetworkHandler(String serverHost, int serverPort, MovementManager movementManager, Player player) throws IOException {
+        this.player = player;
         this.socket = new DatagramSocket();
         this.serverAddress = InetAddress.getByName(serverHost);
         this.serverPort = serverPort;
@@ -37,7 +35,7 @@ public class NetworkHandler {
         networkThreads.execute(() -> {
             while (running) {
                 try {
-                    Frame frame = new Frame(movementManager.getCoords(), isBot);
+                    Frame frame = new Frame(movementManager.getCoords(), isBot, player.getHp());
                     sendMovementRequest(frame);
                     Thread.sleep(5); // Частота отправки пакетов
                 } catch (InterruptedException | IOException e) {

@@ -18,7 +18,6 @@ import utils.Constants;
 
 public class GameRenderer {
     private final PlayerCameraManager playerCameraManager;
-    private final Enemy targetEnemy;
     private final MapCreator mapCreator;
     private final MovementManager playerMovementManager;
     private final int squareSize;
@@ -26,12 +25,11 @@ public class GameRenderer {
     private final BulletManager bulletManager;
     private long lastShot;
 
-    public GameRenderer(PlayerCameraManager playerCameraManager, Enemy targetEnemy,
+    public GameRenderer(PlayerCameraManager playerCameraManager,
                         MapCreator mapCreator, MovementManager playerMovementManager, NetworkHandler networkHandler, int squareSize, BulletManager bulletManager) {
         this.networkHandler = networkHandler;
         this.bulletManager = bulletManager;
         this.playerCameraManager = playerCameraManager;
-        this.targetEnemy = targetEnemy;
         this.mapCreator = mapCreator;
         this.playerMovementManager = playerMovementManager;
         this.squareSize = squareSize;
@@ -171,6 +169,5 @@ public class GameRenderer {
                     hitPoint.y
             );
         }
-
     }
 }

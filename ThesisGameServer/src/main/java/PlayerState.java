@@ -5,13 +5,27 @@ public class PlayerState {
     int x, y;
     long lastProcessedTimestamp;
     boolean isBot;
+    int hp;
     final LinkedList<EnemyFrame> positionHistory = new LinkedList<>();
 
-    PlayerState(int x, int y, boolean isBot) {
+    @Override
+    public String toString() {
+        return "PlayerState{" +
+                "x=" + x +
+                ", y=" + y +
+                ", lastProcessedTimestamp=" + lastProcessedTimestamp +
+                ", isBot=" + isBot +
+                ", hp=" + hp +
+                ", positionHistory=" + positionHistory +
+                '}';
+    }
+
+    PlayerState(int x, int y, boolean isBot, int hp) {
         this.x = x;
         this.y = y;
         this.isBot = isBot;
         this.lastProcessedTimestamp = System.currentTimeMillis();
+        this.hp = hp;
         addFrame(x, y, lastProcessedTimestamp);
     }
 

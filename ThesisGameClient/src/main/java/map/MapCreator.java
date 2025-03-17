@@ -3,6 +3,8 @@ package map;
 import java.awt.*;
 import java.util.ArrayList;
 
+import static utils.Constants.SQUARE_SIZE;
+
 public class MapCreator {
     private final ArrayList<Block> map;
     private final int mapWidth = 980;
@@ -42,13 +44,13 @@ public class MapCreator {
     }
 
     private void addBorders() {
-        for (int x = 0; x < mapWidth; x += 20) {
+        for (int x = 0; x < mapWidth; x += SQUARE_SIZE) {
             map.add(new Block(x, 0)); // Верхняя граница
-            map.add(new Block(x, mapHeight - 20)); // Нижняя граница
+            map.add(new Block(x, mapHeight - SQUARE_SIZE)); // Нижняя граница
         }
-        for (int y = 0; y < mapHeight; y += 20) {
+        for (int y = 0; y < mapHeight; y += SQUARE_SIZE) {
             map.add(new Block(0, y)); // Левая граница
-            map.add(new Block(mapWidth - 20, y)); // Правая граница
+            map.add(new Block(mapWidth - SQUARE_SIZE, y)); // Правая граница
         }
     }
 
@@ -57,13 +59,13 @@ public class MapCreator {
     }
 
     public int[][] generateMapMatrix() {
-        int rows = mapHeight / 20;
-        int cols = mapWidth / 20;
+        int rows = mapHeight / SQUARE_SIZE;
+        int cols = mapWidth / SQUARE_SIZE;
         int[][] matrix = new int[rows][cols];
 
         for (Block block : map) {
-            int x = block.x / 20;
-            int y = block.y / 20;
+            int x = block.x / SQUARE_SIZE;
+            int y = block.y / SQUARE_SIZE;
             if (x >= 0 && x < cols && y >= 0 && y < rows) {
                 matrix[y][x] = -1;
             }
