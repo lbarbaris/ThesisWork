@@ -11,8 +11,13 @@ import java.util.HashMap;
 
 public class RayCastManager {
 
+<<<<<<< HEAD
     private Player player;
     private MapCreator mapCreator;
+=======
+    private final Player player;
+    private final MapCreator mapCreator;
+>>>>>>> bot-update
 
     public RayCastManager(Player player, MapCreator mapCreator) {
         this.player = player;

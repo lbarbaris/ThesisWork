@@ -1,10 +1,7 @@
 package bullets;
 
-import map.Block;
-import map.MapCreator;
 import network.Enemy;
 import player.Player;
-import utils.Constants;
 
 import javax.swing.*;
 import java.awt.*;
