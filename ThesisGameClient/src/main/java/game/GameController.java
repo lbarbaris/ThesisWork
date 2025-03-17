@@ -3,32 +3,33 @@ package game;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import bullets.BulletManager;
+import bullets.RayCastManager;
 import network.Enemy;
 import network.NetworkHandler;
 import player.Player;
-import bullets.Bullet;
 import map.MapCreator;
 import bullets.Gun;
 import movement.MovementManager;
 import utils.CollisionManager;
 import utils.KeyboardController;
 import player.PlayerCameraManager;
+import utils.MouseController;
+
+import static utils.Constants.SQUARE_SIZE;
 
 public class GameController extends JPanel {
     private final PlayerCameraManager playerCameraManager;
     private Enemy targetEnemy;
     private final CollisionManager collisionManager;
+    private final MouseController mouseController;
+    private final RayCastManager rayCastManager;
 
     private final MovementManager playerMovementManager;
     private final NetworkHandler networkHandler;
 
-    private final int squareSize = 20;
     private final MapCreator mapCreator;
-
-    private final CopyOnWriteArrayList<Bullet> bullets = new CopyOnWriteArrayList<>();
 
     private final BulletManager bulletManager;
 
@@ -38,6 +39,7 @@ public class GameController extends JPanel {
 
     public GameController() throws IOException {
         playerCameraManager = new PlayerCameraManager(1000, 1000);
+
 
         targetEnemy = new Enemy(true, 200, 200, 100,  System.currentTimeMillis());
 
@@ -54,21 +56,24 @@ public class GameController extends JPanel {
         Gun defaultGun = new Gun(1000, 12.0, 3.0, 1, 1000, 1);
         player = new Player(50, 50, defaultGun);
         KeyboardController keyboardController = new KeyboardController(player);
+
         addKeyListener(keyboardController);
 
-        bulletManager = new BulletManager(player, this, targetEnemy, mapCreator);
+        rayCastManager = new RayCastManager(player, mapCreator);
 
+        bulletManager = new BulletManager(player, this, targetEnemy, rayCastManager);
 
-        playerMovementManager = new MovementManager(keyboardController, 50, 50, player, playerCameraManager, collisionManager, squareSize, 1500, 1200);
+        mouseController = new MouseController(this, bulletManager);
+        playerMovementManager = new MovementManager(keyboardController, 50, 50, player, playerCameraManager, collisionManager, SQUARE_SIZE, 1500, 1200);
 
-        networkHandler = new NetworkHandler("localhost", 12345, playerMovementManager);
+        networkHandler = new NetworkHandler("localhost", 12345, playerMovementManager, player);
         networkHandler.putToPlayerCoords(targetEnemy);
         networkHandler.startNetworkThreads();
 
         bulletManager.setPlayerCoords(networkHandler.getPlayerCoords());
         bulletManager.start();
 
-        gameRenderer = new GameRenderer(playerCameraManager, targetEnemy, mapCreator, playerMovementManager,  networkHandler, squareSize, bulletManager);
+        gameRenderer = new GameRenderer(playerCameraManager,  mapCreator, playerMovementManager,  networkHandler, SQUARE_SIZE, bulletManager);
     }
 
     @Override

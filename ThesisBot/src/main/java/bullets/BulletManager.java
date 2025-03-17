@@ -1,82 +1,92 @@
 package bullets;
 
+import network.Enemy;
 import player.Player;
 
 import javax.swing.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
-import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.awt.*;
+import java.util.HashMap;
+
+import static java.lang.Math.atan2;
 
 public class BulletManager extends Thread {
-    private final ConcurrentLinkedQueue<Bullet> bullets;
+    private final HashMap<Enemy, Long> enemyHitTimes;
     private final JPanel panel;
     private final Player player;
+    private final Enemy targetEnemy;
+
 
     private volatile boolean shooting;
+    private volatile boolean oneShot = false;
+    private volatile Point lastHitPoint;
     private Thread shootingThread;
+    private RayCastManager rayCastManager;
+    private HashMap<String, Enemy> playerCoords = null;
 
-    public BulletManager(Player player, ConcurrentLinkedQueue<Bullet> bullets, JPanel panel) {
+    public void setPlayerCoords(HashMap<String, Enemy> playerCoords) {
+        this.playerCoords = playerCoords;
+    }
+
+    public BulletManager(Player player, JPanel panel, Enemy targetEnemy, RayCastManager rayCastManager) {
+        this.rayCastManager = rayCastManager;
         this.player = player;
-        this.bullets = bullets;
+        this.lastHitPoint = null;
         this.panel = panel;
-        this.shooting = false;
+        this.targetEnemy = targetEnemy;
+        this.enemyHitTimes = new HashMap<>();
     }
 
-    @Override
-    public void run() {
-        panel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                shooting = true;
-                startShooting();
-            }
 
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                shooting = false;
-            }
-        });
-
-        panel.addMouseMotionListener(new MouseMotionAdapter() {
-            @Override
-            public void mouseDragged(MouseEvent e) {
-                // Перемещение мыши обрабатывается здесь
-            }
-        });
-    }
-
-    private void startShooting() {
-        if (shootingThread != null && shootingThread.isAlive()) {
-            return;
-        }
+    public void startShootingLoop() {
+        if (shootingThread != null && shootingThread.isAlive()) return;
 
         shootingThread = new Thread(() -> {
             Gun gun = player.getGun();
+
             while (shooting) {
+                gun.updateReloadStatus();
                 if (!gun.canShoot()) {
                     gun.reload();
                     continue;
                 }
 
+                Point mouse = panel.getMousePosition();
+                if (mouse == null) return; // мышь вне панели
+
+                double mouseX = mouse.getX();
+                double mouseY = mouse.getY();
+
                 double startX = player.getX();
                 double startY = player.getY();
-                double mouseX = panel.getMousePosition().getX() + player.getCameraX();
-                double mouseY = panel.getMousePosition().getY() + player.getCameraY();
 
-                double angle = Math.atan2(
-                        mouseY - startY + (Math.random() * 2 - 1) * gun.getAccuracy(),
-                        mouseX - startX + (Math.random() * 2 - 1) * gun.getAccuracy()
-                );
+                double angle = atan2(mouseY - startY, mouseX - startX);
 
-                double speedX = Math.cos(angle) * gun.getSpeed();
-                double speedY = Math.sin(angle) * gun.getSpeed();
+                RaycastHit hit = rayCastManager.raycast(angle, playerCoords);
 
+                lastHitPoint = hit.hitPoint;
 
-                    bullets.add(new Bullet(startX, startY, speedX, speedY));
+                if (hit.type == HitType.WALL) {
+                    System.out.println("Пуля попала в стену на расстоянии " + hit.distance);
+                    gun.shoot();
+                    oneShot = true;
+                }
+
+                if (hit.type == HitType.ENEMY) {
+                    Enemy enemy = hit.hitEnemy;
+                    enemy.doDamage(gun.getDamage());
+                    enemyHitTimes.put(enemy, System.currentTimeMillis());
+                    System.out.println("Попадание! Цель: " + enemy);
+                    if (enemy == targetEnemy) {
+                        System.out.println("Попал по мишени!");
+                        if (enemy.getHp() <= 0) {
+                            enemy.setHp(100);
+                            System.out.println("Цель убита и возродилась.");
+                        }
+                    }
+                }
 
                 gun.shoot();
+                oneShot = true;
 
                 try {
                     Thread.sleep(gun.getDelay());
@@ -89,11 +99,33 @@ public class BulletManager extends Thread {
         shootingThread.start();
     }
 
-    public boolean isBulletHitPlayer(Bullet bullet, Player player, double squareSize) {
-        double dx = bullet.getX() - (player.getX() + squareSize / 2.0);
-        double dy = bullet.getY() - (player.getY() + squareSize / 2.0);
-        double distance = Math.sqrt(dx * dx + dy * dy);
+    public boolean getOneShot(){
+        if (oneShot) {
+            oneShot = false;
+            return true;
+        }
+        return false;
+    }
 
-        return distance < squareSize / 2.0; // Считаем попадание, если пуля в радиусе игрока
+
+
+    public HashMap<Enemy, Long> getEnemyHitTimes() {
+        return enemyHitTimes;
+    }
+
+    public Point getLastHitPoint() {
+        return lastHitPoint;
+    }
+
+
+    public boolean isShooting() {
+        return shooting;
+    }
+
+    public void setShooting(boolean shooting) {
+        this.shooting = shooting;
     }
 }
+
+
+

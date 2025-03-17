@@ -5,29 +5,28 @@ import java.awt.*;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CopyOnWriteArrayList;
 
+import bullets.RayCastManager;
 import map.cells.Cell;
 import map.paths.PathfindingAbstractClass;
 import map.paths.WaveAlgorithm;
 import network.Enemy;
 import network.NetworkHandler;
 import player.Player;
-import bullets.Bullet;
 import bullets.BulletManager;
 import map.MapCreator;
 import bullets.Gun;
 import movement.MovementManager;
 import utils.CollisionManager;
 import player.PlayerCameraManager;
+import utils.MouseController;
 
 public class GameController extends JPanel {
     private final PlayerCameraManager playerCameraManager;
-    private Player targetPlayer;
+    private RayCastManager rayCastManager;
+    private Enemy targetEnemy;
     private final CollisionManager collisionManager;
-    private boolean targetHit;
-    private long targetHitTime;
+    private final MouseController mouseController;
     private final MovementManager playerMovementManager;
     private final NetworkHandler networkHandler;
     private final PathfindingAbstractClass pathFinding;
@@ -35,19 +34,16 @@ public class GameController extends JPanel {
     private final int squareSize = 20;
     private final MapCreator mapCreator;
 
-    private final ConcurrentLinkedQueue<Bullet> bullets = new ConcurrentLinkedQueue<>();
-
     private final BulletManager bulletManager;
     private final Player player;
     private final GameRenderer gameRenderer;
     private int distanceCounter;
 
     public GameController() throws IOException {
+
         playerCameraManager = new PlayerCameraManager(1000, 1000);
 
-        Gun targetGun = new Gun(100, 8.0, 5.0, 10, 3000, (short) 10);
-        targetPlayer = new Player(200, 200, targetGun);
-        targetHit = false;
+        targetEnemy = new Enemy(true, 200, 200, 100,  System.currentTimeMillis());
 
         mapCreator = new MapCreator((short) 3);
 
@@ -59,14 +55,21 @@ public class GameController extends JPanel {
         Gun defaultGun = new Gun(1000, 12.0, 3.0, 100, 2500, (short) 10);
         player = new Player(50, 50, defaultGun);
 
-        bulletManager = new BulletManager(player, bullets, this);
-        bulletManager.start();
+        this.rayCastManager = new RayCastManager(player, mapCreator);
+        bulletManager = new BulletManager(player, this, targetEnemy, rayCastManager);
+
+        mouseController = new MouseController(this, bulletManager);
+
         playerMovementManager = new MovementManager(50, 50, player, playerCameraManager, collisionManager, squareSize, 1500, 1200);
 
-        networkHandler = new NetworkHandler("localhost", 12345, playerMovementManager, bulletManager);
+        networkHandler = new NetworkHandler("localhost", 12345, playerMovementManager, bulletManager, player);
+        networkHandler.putToPlayerCoords(targetEnemy);
         networkHandler.startNetworkThreads();
 
-        gameRenderer = new GameRenderer(playerCameraManager, targetPlayer, bullets, mapCreator, playerMovementManager,  squareSize, pathFinding, networkHandler);
+        bulletManager.setPlayerCoords(networkHandler.getPlayerCoords());
+        bulletManager.start();
+
+        gameRenderer = new GameRenderer(playerCameraManager, bulletManager,  mapCreator, playerMovementManager,  squareSize, pathFinding, networkHandler);
         long time = System.currentTimeMillis();
 
         long time2 = System.currentTimeMillis();
@@ -94,28 +97,6 @@ public class GameController extends JPanel {
     private void updateGame() {
         player.getGun().updateReloadStatus();
 
-        bullets.removeIf(bullet ->
-                bullet.getX() < 0 || bullet.getX() > 1500 ||
-                        bullet.getY() < 0 || bullet.getY() > 1200 ||
-                        collisionManager.isWallHit(new Rectangle((int) bullet.getX(), (int) bullet.getY(), 10, 10))
-        );
-
-        bullets.forEach(bullet -> {
-            bullet.setX(bullet.getX() + bullet.getSpeedX());
-            bullet.setY(bullet.getY() + bullet.getSpeedY());
-
-            if (bulletManager.isBulletHitPlayer(bullet, targetPlayer, squareSize)) {
-                targetHit = true;
-                targetHitTime = System.currentTimeMillis();
-                targetPlayer.doDamage(player.getGun().getDamage());
-                if (targetPlayer.getHp() <= 0){
-                    Gun targetGun = targetPlayer.getGun();
-                    targetPlayer = new Player(200, 200, targetGun);
-                    targetHit = false;
-                }
-            }
-        });
-
         HashMap<String, Enemy> coords = networkHandler.getPlayerCoords();
 
         if (distanceCounter % 150 == 0 && !coords.isEmpty()) {
@@ -142,7 +123,7 @@ public class GameController extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        gameRenderer.render(g, this, targetHit, targetHitTime, player);
+        gameRenderer.render(g, this, player);
     }
 
     public MovementManager getPlayerMovementManager() {

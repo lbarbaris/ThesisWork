@@ -13,6 +13,7 @@ public class GameActionListener implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+
         gameController.getPlayerMovementManager().move();
         gameController.repaint();
     }

@@ -2,6 +2,7 @@ package network;
 
 import bullets.BulletManager;
 import movement.MovementManager;
+import player.Player;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -21,13 +22,16 @@ public class NetworkHandler {
     private final ExecutorService networkThreads = Executors.newFixedThreadPool(2);
     private volatile boolean running = true;
     private HashMap<String, Enemy> PlayerCoords;
+    private Player player;
 
-    public NetworkHandler(String serverHost, int serverPort, MovementManager movementManager, BulletManager bulletManager) throws IOException {
+    public NetworkHandler(String serverHost, int serverPort, MovementManager movementManager, BulletManager bulletManager, Player player) throws IOException {
         this.bulletManager = bulletManager;
         this.socket = new DatagramSocket();
         this.serverAddress = InetAddress.getByName(serverHost);
         this.serverPort = serverPort;
         this.movementManager = movementManager;
+        this.player = player;
+
         PlayerCoords = new HashMap<>();
     }
 
@@ -36,7 +40,7 @@ public class NetworkHandler {
         networkThreads.execute(() -> {
             while (running) {
                 try {
-                    Frame frame = new Frame(movementManager.getCoords(), isBot);
+                    Frame frame = new Frame(movementManager.getCoords(), isBot, player.getHp());
                     sendMovementRequest(frame);
                     Thread.sleep(5); // Частота отправки пакетов
                 } catch (InterruptedException | IOException e) {
@@ -80,7 +84,14 @@ public class NetworkHandler {
 
 
         for (int i = 3; i < parts.length - 3; i += 4){
-            PlayerCoords.put(parts[i + 2], new Enemy(Boolean.parseBoolean(parts[i + 3]), Integer.parseInt(parts[i]), Integer.parseInt(parts[i + 1]), (short) 100));
+            int x = Integer.parseInt(parts[i]);
+            int y = Integer.parseInt(parts[i + 1]);
+            String id = parts[i + 2];
+            boolean bot = Boolean.parseBoolean(parts[i + 3]);
+
+            Enemy enemy = PlayerCoords.getOrDefault(id, new Enemy(bot, x, y, 100, serverTimeStamp));
+            enemy.addFrame(x, y, serverTimeStamp);
+            PlayerCoords.put(id, enemy);
         }
 
     }
@@ -93,5 +104,9 @@ public class NetworkHandler {
 
     public HashMap<String, Enemy> getPlayerCoords(){
         return PlayerCoords;
+    }
+
+    public void putToPlayerCoords(Enemy enemy){
+        PlayerCoords.put("target", enemy);
     }
 }

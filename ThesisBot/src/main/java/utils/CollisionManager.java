@@ -1,5 +1,6 @@
 package utils;
 
+import map.Block;
 import map.cells.MapCell;
 
 import java.awt.*;
@@ -7,9 +8,9 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
 public class CollisionManager {
-    private ArrayList<MapCell> map;
+    private ArrayList<Block> map;
 
-    public CollisionManager(ArrayList<MapCell> map) {
+    public CollisionManager(ArrayList<Block> map) {
         this.map = map;
     }
 
