@@ -21,7 +21,6 @@ public class GameRenderer {
     private final PlayerCameraManager playerCameraManager;
     private final MapCreator mapCreator;
     private final MovementManager playerMovementManager;
-    private final int squareSize;
     private final PathfindingAbstractClass pathFindingAbstractClass;
     private final NetworkHandler networkHandler;
     private BulletManager bulletManager;
@@ -29,11 +28,10 @@ public class GameRenderer {
 
 
     public GameRenderer(PlayerCameraManager playerCameraManager, BulletManager bulletManager,
-                        MapCreator mapCreator, MovementManager playerMovementManager, int squareSize, PathfindingAbstractClass pathFindingAbstractClass, NetworkHandler networkHandler) {
+                        MapCreator mapCreator, MovementManager playerMovementManager, PathfindingAbstractClass pathFindingAbstractClass, NetworkHandler networkHandler) {
         this.playerCameraManager = playerCameraManager;
         this.mapCreator = mapCreator;
         this.playerMovementManager = playerMovementManager;
-        this.squareSize = squareSize;
         this.pathFindingAbstractClass = pathFindingAbstractClass;
         this.networkHandler = networkHandler;
         this.bulletManager = bulletManager;
@@ -93,13 +91,13 @@ public class GameRenderer {
             }
 
 
-            g2.fillRect(interpPos.x, interpPos.y, squareSize, squareSize);
+            g2.fillRect(interpPos.x, interpPos.y, Constants.SQUARE_SIZE, Constants.SQUARE_SIZE);
         }
     }
 
     private void renderPlayer(Graphics2D g2){
         g2.setColor(Color.BLUE);
-        g2.fillRect(playerMovementManager.getX(), playerMovementManager.getY(), squareSize, squareSize);
+        g2.fillRect(playerMovementManager.getX(), playerMovementManager.getY(), Constants.SQUARE_SIZE, Constants.SQUARE_SIZE);
     }
 
     private void renderHP(Graphics2D g2, JComponent component, Player player){
@@ -117,7 +115,7 @@ public class GameRenderer {
         Gun gun = player.getGun();
         if (gun.isReloading()) {
             double progress = gun.getReloadProgress();
-            int barWidth = squareSize;
+            int barWidth = Constants.SQUARE_SIZE;
             int barHeight = 5;
             int barX = playerMovementManager.getX();
             int barY = playerMovementManager.getY() - 10;
@@ -162,8 +160,8 @@ public class GameRenderer {
         LinkedList<Point> path = pathFindingAbstractClass.getPath();
         g2.setColor(Color.CYAN);
         for (Point p : path) {
-            g2.fillRect(p.x * squareSize + squareSize / 4, p.y * squareSize + squareSize / 4,
-                    squareSize / 2, squareSize / 2);
+            g2.fillRect(p.x * Constants.SQUARE_SIZE + Constants.SQUARE_SIZE / 4, p.y * Constants.SQUARE_SIZE + Constants.SQUARE_SIZE / 4,
+                    Constants.SQUARE_SIZE / 2, Constants.SQUARE_SIZE / 2);
         }
     }
 
@@ -179,8 +177,8 @@ public class GameRenderer {
 
             g2.setColor(Color.YELLOW);
             g2.drawLine(
-                    (int) (player.getX() + squareSize / 2.0),
-                    (int) (player.getY() + squareSize / 2.0),
+                    (int) (player.getX() + Constants.SQUARE_SIZE / 2.0),
+                    (int) (player.getY() + Constants.SQUARE_SIZE / 2.0),
                     hitPoint.x,
                     hitPoint.y
             );

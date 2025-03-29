@@ -64,7 +64,7 @@ public class GameController extends JPanel {
         this.rayCastManager = new RayCastManager(player, mapCreator);
         bulletManager = new BulletManager(player, this, targetEnemy, rayCastManager);
 
-        playerMovementManager = new MovementManager(50, 50, player, playerCameraManager, collisionManager, squareSize, 1500, 1200);
+        playerMovementManager = new MovementManager(50, 50, player, playerCameraManager, collisionManager);
 
         networkHandler = new NetworkHandler("localhost", 12345, playerMovementManager, bulletManager, player);
         networkHandler.putToPlayerCoords(targetEnemy);
@@ -73,7 +73,7 @@ public class GameController extends JPanel {
         bulletManager.setPlayerCoords(networkHandler.getPlayerCoords());
         bulletManager.start();
 
-        gameRenderer = new GameRenderer(playerCameraManager, bulletManager,  mapCreator, playerMovementManager,  squareSize, pathFinding, networkHandler);
+        gameRenderer = new GameRenderer(playerCameraManager, bulletManager,  mapCreator, playerMovementManager, pathFinding, networkHandler);
 
         distanceCounter = 0;
 

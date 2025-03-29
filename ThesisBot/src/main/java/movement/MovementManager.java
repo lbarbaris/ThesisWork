@@ -1,6 +1,7 @@
 package movement;
 
 import map.cells.Cell;
+import utils.Constants;
 import utils.player.Player;
 import utils.player.PlayerCameraManager;
 import utils.map.CollisionManager;
@@ -15,8 +16,6 @@ public class MovementManager {
     private final Player player;
     private final PlayerCameraManager playerCameraManager;
     private final CollisionManager collisionManager;
-    private final int squareSize;
-    private final int mapWidth, mapHeight;
     private LinkedList<Point> botPath = new LinkedList<>();
 
     private int x, dx, y, dy; // Локальные координаты
@@ -25,17 +24,11 @@ public class MovementManager {
             int x, int y,
             Player player,
             PlayerCameraManager playerCameraManager,
-            CollisionManager collisionManager,
-            int squareSize,
-            int mapWidth,
-            int mapHeight){
+            CollisionManager collisionManager){
 
         this.player = player;
         this.playerCameraManager = playerCameraManager;
         this.collisionManager = collisionManager;
-        this.squareSize = squareSize;
-        this.mapWidth = mapWidth;
-        this.mapHeight = mapHeight;
         this.x = x;
         this.y = y;
 
@@ -52,8 +45,8 @@ public class MovementManager {
 
        if (!botPath.isEmpty() ) {
             Point nextPoint = botPath.getFirst();
-            int targetX = nextPoint.x * squareSize;
-            int targetY = nextPoint.y * squareSize;
+            int targetX = nextPoint.x * Constants.SQUARE_SIZE;
+            int targetY = nextPoint.y * Constants.SQUARE_SIZE;
 
             if (x < targetX) dx = 1;
             if (x > targetX) dx = -1;
@@ -69,10 +62,10 @@ public class MovementManager {
             int nextX = x + dx;
             int nextY = y + dy;
 
-            nextX = Math.max(0, Math.min(nextX, mapWidth - squareSize));
-            nextY = Math.max(0, Math.min(nextY, mapHeight - squareSize));
+            nextX = Math.max(0, Math.min(nextX, Constants.MAP_WIDTH_SIZE - Constants.SQUARE_SIZE));
+            nextY = Math.max(0, Math.min(nextY, Constants.MAP_HEIGHT_SIZE - Constants.SQUARE_SIZE));
 
-            if (!collisionManager.isWallHit(new Rectangle(nextX, nextY, squareSize, squareSize))) {
+            if (!collisionManager.isWallHit(new Rectangle(nextX, nextY, Constants.SQUARE_SIZE, Constants.SQUARE_SIZE))) {
                 x = nextX;
                 y = nextY;
             }
