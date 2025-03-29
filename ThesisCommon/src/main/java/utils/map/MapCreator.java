@@ -1,11 +1,11 @@
 package utils.map;
 
+import utils.Constants;
+
 import java.util.ArrayList;
 
 public class MapCreator {
     private final ArrayList<Block> map;
-    private final int mapWidth = 10980;
-    private final int mapHeight = 10980;
     private String mapName;
 
     public ArrayList<Block> getMap() {
@@ -42,13 +42,13 @@ public class MapCreator {
     }
 
     private void addBorders() {
-        for (int x = 0; x < mapWidth; x += 20) {
+        for (int x = 0; x < Constants.MAP_WIDTH_SIZE; x += 20) {
             map.add(new Block(x, 0)); // Верхняя граница
-            map.add(new Block(x, mapHeight - 20)); // Нижняя граница
+            map.add(new Block(x, Constants.MAP_HEIGHT_SIZE - 20)); // Нижняя граница
         }
-        for (int y = 0; y < mapHeight; y += 20) {
+        for (int y = 0; y < Constants.MAP_HEIGHT_SIZE; y += 20) {
             map.add(new Block(0, y)); // Левая граница
-            map.add(new Block(mapWidth - 20, y)); // Правая граница
+            map.add(new Block(Constants.MAP_WIDTH_SIZE - 20, y)); // Правая граница
         }
     }
 
@@ -57,8 +57,8 @@ public class MapCreator {
     }
 
     public int[][] generateMapMatrix() {
-        int rows = mapHeight / 20;
-        int cols = mapWidth / 20;
+        int rows = Constants.MAP_HEIGHT_SIZE / 20;
+        int cols = Constants.MAP_WIDTH_SIZE / 20;
         int[][] matrix = new int[rows][cols];
 
         for (Block block : map) {
@@ -72,6 +72,6 @@ public class MapCreator {
     }
 
     public int getWidthCellsSize(){
-        return mapWidth / 20;
+        return Constants.MAP_WIDTH_SIZE / 20;
     }
 }
