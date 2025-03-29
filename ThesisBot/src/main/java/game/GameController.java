@@ -125,11 +125,11 @@ public class GameController extends JPanel {
                 pathFinding.findPath(new Cell(playerMovementManager.getX(), playerMovementManager.getY()), new Cell(coords.get(closestPlayerName).getInterpolatedPosition(renderTime)));
                 if (graphCounter < Constants.PATH_MEASUREMENT_SIZE){
                     graphResource.addValue(0, (long) graphCounter);
-                    graphResource.addValue(1, (startTime - System.currentTimeMillis()));
+                    graphResource.addValue(1, (System.currentTimeMillis() - startTime));
                     graphCounter++;
                 }
                 else {
-                    graphResource.exportToTxt(pathFinding.getClass().getName() + "_" + mapCreator.getWidthCellsSize() + ".txt");
+                    graphResource.exportToTxt(pathFinding.getClass().getSimpleName() + "_" + Constants.MAP_WIDTH_SIZE / Constants.SQUARE_SIZE + "x" + Constants.MAP_HEIGHT_SIZE / Constants.SQUARE_SIZE + ".txt");
                 }
 
                 playerMovementManager.setPath(pathFinding.getPath());

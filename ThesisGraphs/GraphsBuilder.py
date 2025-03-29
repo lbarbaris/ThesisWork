@@ -37,6 +37,8 @@ def plot_from_directory(directory):
         return
 
     for file in files:
+        if file.endswith(".DS_Store"):
+            continue  # Пропускаем системный файл
         file_path = os.path.join(directory, file)
         print(f"Обрабатывается файл: {file}")
         plot_from_file(file_path)
