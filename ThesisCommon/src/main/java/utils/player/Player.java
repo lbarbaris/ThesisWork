@@ -1,5 +1,6 @@
 package utils.player;
 
+import utils.Constants;
 import utils.bullets.Gun;
 
 public class Player {
@@ -13,7 +14,7 @@ public class Player {
         this.x = startX;
         this.y = startY;
         this.gun = gun;
-        this.hp = 100;
+        this.hp = Constants.PLAYER_MAX_HP;
     }
 
     public int getHp(){

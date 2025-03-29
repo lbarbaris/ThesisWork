@@ -38,10 +38,10 @@ public class GameController extends JPanel {
     private final GameRenderer gameRenderer;
 
     public GameController() throws IOException {
-        playerCameraManager = new PlayerCameraManager(1000, 1000);
+        playerCameraManager = new PlayerCameraManager(Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT);
 
 
-        targetEnemy = new Enemy(true, 200, 200, 100,  System.currentTimeMillis());
+        targetEnemy = new Enemy(true, 200, 200, Constants.PLAYER_MAX_HP,  System.currentTimeMillis());
 
         mapCreator = new MapCreator((short) 3);
 /*        System.out.println(
@@ -66,7 +66,7 @@ public class GameController extends JPanel {
 
         playerMovementManager = new MovementManager(keyboardController, 50, 50, player, playerCameraManager, collisionManager);
 
-        networkHandler = new NetworkHandler("localhost", Constants.SERVER_PORT, playerMovementManager, player);
+        networkHandler = new NetworkHandler(Constants.SERVER_ADDRESS, Constants.SERVER_PORT, playerMovementManager, player);
 
         networkHandler.putToPlayerCoords(targetEnemy);
         networkHandler.startNetworkThreads();

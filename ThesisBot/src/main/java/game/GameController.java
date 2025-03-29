@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import map.cells.Cell;
-import map.paths.AStarAlgorithm;
 import map.paths.WaveAlgorithm;
 import utils.bullets.RayCastManager;
 
@@ -48,7 +47,7 @@ public class GameController extends JPanel {
 
         playerCameraManager = new PlayerCameraManager(1000, 1000);
 
-        targetEnemy = new Enemy(true, 200, 200, 100,  System.currentTimeMillis());
+        targetEnemy = new Enemy(true, 200, 200, Constants.PLAYER_MAX_HP,  System.currentTimeMillis());
 
         mapCreator = new MapCreator((short) 3);
 
@@ -65,7 +64,7 @@ public class GameController extends JPanel {
 
         playerMovementManager = new MovementManager(50, 50, player, playerCameraManager, collisionManager);
 
-        networkHandler = new NetworkHandler("localhost", Constants.SERVER_PORT, playerMovementManager, bulletManager, player);
+        networkHandler = new NetworkHandler(Constants.SERVER_ADDRESS, Constants.SERVER_PORT, playerMovementManager, bulletManager, player);
         networkHandler.putToPlayerCoords(targetEnemy);
         networkHandler.startNetworkThreads();
 

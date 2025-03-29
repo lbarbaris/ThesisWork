@@ -79,7 +79,7 @@ public class GameRenderer {
         for (Map.Entry<String, Enemy> entry : coords.entrySet()) {
             Enemy enemy = entry.getValue();
             Point interpPos = enemy.getInterpolatedPosition(renderTime);
-            if (!hitTimes.isEmpty() && hitTimes.get(entry.getValue()) != null && (System.currentTimeMillis() - hitTimes.get(entry.getValue()) < 100)){
+            if (!hitTimes.isEmpty() && hitTimes.get(entry.getValue()) != null && (System.currentTimeMillis() - hitTimes.get(entry.getValue()) < Constants.INTERPOLATION_DELAY_MS)){
                 g2.setColor(Color.RED);
             }
             else {

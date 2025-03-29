@@ -94,11 +94,11 @@ public class NetworkHandler {
         int serverPacketNumber = Integer.parseInt(parts[4]);
         player.setHp(hp);
         if (player.getHp() <= 0){
-            player.respawn(50, 50, 100);
+            player.respawn(50, 50, Constants.PLAYER_MAX_HP);
         }
 
         if (hp <= 0){
-            player.respawn(50, 50, 100);
+            player.respawn(50, 50, Constants.PLAYER_MAX_HP);
         }
         movementManager.applyServerData(serverX, serverY, serverTimeStamp);
 
@@ -109,7 +109,7 @@ public class NetworkHandler {
             String id = parts[i + 2];
             boolean bot = Boolean.parseBoolean(parts[i + 3]);
 
-            Enemy enemy = PlayerCoords.getOrDefault(id, new Enemy(bot, x, y, 100, serverTimeStamp));
+            Enemy enemy = PlayerCoords.getOrDefault(id, new Enemy(bot, x, y, Constants.PLAYER_MAX_HP, serverTimeStamp));
             enemy.addFrame(x, y, serverTimeStamp);
             PlayerCoords.put(id, enemy);
         }

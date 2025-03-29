@@ -1,5 +1,6 @@
 package bullets;
 
+import utils.Constants;
 import utils.bullets.Gun;
 import utils.bullets.HitType;
 import utils.bullets.RayCastManager;
@@ -96,7 +97,7 @@ public class BulletManager extends Thread {
                     if (enemy == targetEnemy) {
                         System.out.println("Попал по мишени!");
                         if (enemy.getHp() <= 0) {
-                            enemy.setHp(100);
+                            enemy.setHp(Constants.PLAYER_MAX_HP);
                             System.out.println("Цель убита и возродилась.");
                         }
                     }

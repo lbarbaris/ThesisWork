@@ -1,5 +1,7 @@
 package game;
 
+import utils.Constants;
+
 import javax.swing.*;
 import java.io.IOException;
 
@@ -14,7 +16,7 @@ public class Game {
         gameTimer.start();
 
         frame.add(gameController);
-        frame.setSize(1000, 1000);
+        frame.setSize(Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
     }

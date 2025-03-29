@@ -14,5 +14,12 @@ public class Constants {
 
     public static final int SERVER_PORT = 12345;
 
+    public static final String SERVER_ADDRESS = "localhost";
+
+    public static final int WINDOW_HEIGHT = 1000;
+    public static final int WINDOW_WIDTH = 1000;
+
+    public static final int PLAYER_MAX_HP = 100;
+
 
 }

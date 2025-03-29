@@ -215,7 +215,7 @@ public class SimpleGameServer {
     private void startRendering() {
         JFrame frame = new JFrame("Game Server");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1000, 1000);
+        frame.setSize(Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT);
 
         GameRenderer renderer = new GameRenderer(mapCreator, playerStates);
         frame.add(renderer);
