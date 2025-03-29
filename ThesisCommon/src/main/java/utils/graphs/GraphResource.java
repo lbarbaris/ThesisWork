@@ -1,5 +1,7 @@
 package utils.graphs;
 
+import utils.Constants;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -76,9 +78,9 @@ public class GraphResource<T> {
         return data.get(seriesIndex);
     }
 
-    public void exportToTxt(String filePath) {
+    public void exportToTxt(String fileName) {
         try {
-            File file = new File(filePath);
+            File file = new File(Constants.GRAPH_PATH + fileName);
             file.getParentFile().mkdirs(); // Создает директории, если их нет
             try (FileWriter writer = new FileWriter(file)) {
                 writer.write(title + "\n");
@@ -92,7 +94,7 @@ public class GraphResource<T> {
                     writer.write("\n");
                 }
 
-                System.out.println("Данные успешно экспортированы в " + filePath);
+                System.out.println("Данные успешно экспортированы в " + Constants.GRAPH_PATH + fileName);
             }
         } catch (IOException e) {
             System.err.println("Ошибка при записи в файл: " + e.getMessage());

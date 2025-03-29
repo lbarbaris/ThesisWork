@@ -21,5 +21,7 @@ public class Constants {
 
     public static final int PLAYER_MAX_HP = 100;
 
+    public static final String GRAPH_PATH = "ThesisGraphs/resources/";
+
 
 }

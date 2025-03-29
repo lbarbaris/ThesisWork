@@ -129,7 +129,7 @@ public class GameController extends JPanel {
                     graphCounter++;
                 }
                 else {
-                    graphResource.exportToTxt("ThesisGraphs/resources/" + pathFinding.getClass() + "_" + mapCreator.getWidthCellsSize() + ".txt");
+                    graphResource.exportToTxt(pathFinding.getClass().getName() + "_" + mapCreator.getWidthCellsSize() + ".txt");
                 }
 
                 playerMovementManager.setPath(pathFinding.getPath());
