@@ -1,5 +1,6 @@
 package server;
 
+import utils.Constants;
 import utils.map.MapCreator;
 
 import javax.swing.*;
@@ -46,12 +47,12 @@ public class GameRenderer extends JPanel {
                 g2.setColor(Color.GREEN);
             }
 
-            g2.fillRect(interpolated.x, interpolated.y, 20, 20);
+            g2.fillRect(interpolated.x, interpolated.y, Constants.SQUARE_SIZE, Constants.SQUARE_SIZE);
         }
     }
 
     private long getRenderTimestamp() {
-        return System.currentTimeMillis() - 100; // ≈100 мс задержка для интерполяции
+        return System.currentTimeMillis() - Constants.INTERPOLATION_DELAY_MS; // ≈100 мс задержка для интерполяции
     }
 }
 

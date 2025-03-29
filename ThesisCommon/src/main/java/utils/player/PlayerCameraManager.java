@@ -10,7 +10,7 @@ public class PlayerCameraManager {
     }
 
     public void updateCamera(int x, int y) {
-/*        int halfScreenWidth = (int) (screenWidth / 1.5);
+        int halfScreenWidth = (int) (screenWidth / 1.5);
         int halfScreenHeight = (int) (screenHeight / 1.5);
 
         if (x > cameraX + halfScreenWidth) {
@@ -23,7 +23,7 @@ public class PlayerCameraManager {
             cameraY = y - halfScreenHeight;
         } else if (y < cameraY + halfScreenHeight) {
             cameraY = Math.max(0, y - halfScreenHeight);
-        }*/
+        }
     }
 
     public int getCameraX() {

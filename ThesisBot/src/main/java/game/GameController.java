@@ -65,7 +65,7 @@ public class GameController extends JPanel {
 
         playerMovementManager = new MovementManager(50, 50, player, playerCameraManager, collisionManager);
 
-        networkHandler = new NetworkHandler("localhost", 12345, playerMovementManager, bulletManager, player);
+        networkHandler = new NetworkHandler("localhost", Constants.SERVER_PORT, playerMovementManager, bulletManager, player);
         networkHandler.putToPlayerCoords(targetEnemy);
         networkHandler.startNetworkThreads();
 
@@ -104,7 +104,7 @@ public class GameController extends JPanel {
         HashMap<String, Enemy> coords = networkHandler.getPlayerCoords();
         //System.out.println(coords.keySet());
 
-        if (distanceCounter % 150 == 0 && !coords.isEmpty()) {
+        if (distanceCounter % Constants.BOT_UPDATE_PATH_RATE == 0 && !coords.isEmpty()) {
 
             double distance = Double.MAX_VALUE;
             String closestPlayerName = "";
@@ -124,7 +124,7 @@ public class GameController extends JPanel {
             if (!closestPlayerName.isEmpty()) {
                 long startTime = System.currentTimeMillis();
                 pathFinding.findPath(new Cell(playerMovementManager.getX(), playerMovementManager.getY()), new Cell(coords.get(closestPlayerName).getInterpolatedPosition(renderTime)));
-                if (graphCounter < 100){
+                if (graphCounter < Constants.PATH_MEASUREMENT_SIZE){
                     graphResource.addValue(0, (long) graphCounter);
                     graphResource.addValue(1, (startTime - System.currentTimeMillis()));
                     graphCounter++;

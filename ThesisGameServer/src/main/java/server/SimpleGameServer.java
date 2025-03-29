@@ -1,5 +1,6 @@
 package server;
 
+import utils.Constants;
 import utils.map.CollisionManager;
 import utils.map.MapCreator;
 
@@ -15,7 +16,6 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SimpleGameServer {
-    private final int PLAYER_SIZE = 20;
     private final MapCreator mapCreator;
     private final DatagramSocket socket;
     private final CollisionManager collisionManager;
@@ -62,7 +62,7 @@ public class SimpleGameServer {
                     // Сохрани snapshot мира по времени shotTime
                     Map<String, Enemy2> snapshot = getWorldStateAt(shotTime);
 
-                    performServerSideRaycast( shooterX, shooterY, mouseX, mouseY, playerKey, shotTime - 100);
+                    performServerSideRaycast( shooterX, shooterY, mouseX, mouseY, playerKey, shotTime - Constants.INTERPOLATION_DELAY_MS);
                 }
                 else {
 
@@ -85,7 +85,7 @@ public class SimpleGameServer {
                     int newX = state.x + (int) Math.signum(clientX - state.x) * dxAllowed;
                     int newY = state.y + (int) Math.signum(clientY - state.y) * dyAllowed;
 
-                    if (!collisionManager.isWallHit(new Rectangle(newX, newY, PLAYER_SIZE, PLAYER_SIZE))) {
+                    if (!collisionManager.isWallHit(new Rectangle(newX, newY, Constants.SQUARE_SIZE, Constants.SQUARE_SIZE))) {
                         state.x = newX;
                         state.y = newY;
                         state.lastProcessedTimestamp = timestamp;
@@ -101,7 +101,7 @@ public class SimpleGameServer {
 
     private Map<String, Enemy2> getWorldStateAt(long timestamp) {
         Map<String, Enemy2> snapshot = new HashMap<>();
-        long correctedTimestamp = timestamp - 100;
+        long correctedTimestamp = timestamp - Constants.INTERPOLATION_DELAY_MS;
 
         for (Map.Entry<String, Enemy2> entry : playerStates.entrySet()) {
             Enemy2 state = entry.getValue();
@@ -123,7 +123,7 @@ public class SimpleGameServer {
 
         double maxRayLength = 10000;
         double step = 1.0;
-        double radius = PLAYER_SIZE / 2.0;
+        double radius = Constants.SQUARE_SIZE / 2.0;
 
         Enemy2 shooter = playerStates.get(shooterId);
         if (shooter == null) return;
@@ -226,7 +226,7 @@ public class SimpleGameServer {
 
     public static void main(String[] args) {
         try {
-            SimpleGameServer server = new SimpleGameServer(12345);
+            SimpleGameServer server = new SimpleGameServer(Constants.SERVER_PORT);
             server.start();
         } catch (Exception e) {
             e.printStackTrace();

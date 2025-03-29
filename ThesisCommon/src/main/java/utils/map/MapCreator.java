@@ -42,13 +42,13 @@ public class MapCreator {
     }
 
     private void addBorders() {
-        for (int x = 0; x < Constants.MAP_WIDTH_SIZE; x += 20) {
+        for (int x = 0; x < Constants.MAP_WIDTH_SIZE; x += Constants.SQUARE_SIZE) {
             map.add(new Block(x, 0)); // Верхняя граница
-            map.add(new Block(x, Constants.MAP_HEIGHT_SIZE - 20)); // Нижняя граница
+            map.add(new Block(x, Constants.MAP_HEIGHT_SIZE - Constants.SQUARE_SIZE)); // Нижняя граница
         }
-        for (int y = 0; y < Constants.MAP_HEIGHT_SIZE; y += 20) {
+        for (int y = 0; y < Constants.MAP_HEIGHT_SIZE; y += Constants.SQUARE_SIZE) {
             map.add(new Block(0, y)); // Левая граница
-            map.add(new Block(Constants.MAP_WIDTH_SIZE - 20, y)); // Правая граница
+            map.add(new Block(Constants.MAP_WIDTH_SIZE - Constants.SQUARE_SIZE, y)); // Правая граница
         }
     }
 
@@ -57,13 +57,13 @@ public class MapCreator {
     }
 
     public int[][] generateMapMatrix() {
-        int rows = Constants.MAP_HEIGHT_SIZE / 20;
-        int cols = Constants.MAP_WIDTH_SIZE / 20;
+        int rows = Constants.MAP_HEIGHT_SIZE / Constants.SQUARE_SIZE;
+        int cols = Constants.MAP_WIDTH_SIZE / Constants.SQUARE_SIZE;
         int[][] matrix = new int[rows][cols];
 
         for (Block block : map) {
-            int x = block.x / 20;
-            int y = block.y / 20;
+            int x = block.x / Constants.SQUARE_SIZE;
+            int y = block.y / Constants.SQUARE_SIZE;
             if (x >= 0 && x < cols && y >= 0 && y < rows) {
                 matrix[y][x] = -1;
             }
@@ -72,6 +72,6 @@ public class MapCreator {
     }
 
     public int getWidthCellsSize(){
-        return Constants.MAP_WIDTH_SIZE / 20;
+        return Constants.MAP_WIDTH_SIZE / Constants.SQUARE_SIZE;
     }
 }

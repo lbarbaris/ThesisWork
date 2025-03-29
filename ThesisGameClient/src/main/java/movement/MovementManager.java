@@ -2,6 +2,7 @@ package movement;
 
 
 
+import utils.Constants;
 import utils.input.KeyboardController;
 import utils.map.CollisionManager;
 import utils.player.Player;
@@ -17,8 +18,6 @@ public class MovementManager {
     private final Player player;
     private final PlayerCameraManager playerCameraManager;
     private final CollisionManager collisionManager;
-    private final int squareSize;
-    private final int mapWidth, mapHeight;
 
     private int x, dx, y, dy; // Локальные координаты
 
@@ -27,18 +26,12 @@ public class MovementManager {
             int x, int y,
             Player player,
             PlayerCameraManager playerCameraManager,
-            CollisionManager collisionManager,
-            int squareSize,
-            int mapWidth,
-            int mapHeight){
+            CollisionManager collisionManager){
 
         this.keyboardController = keyboardController;
         this.player = player;
         this.playerCameraManager = playerCameraManager;
         this.collisionManager = collisionManager;
-        this.squareSize = squareSize;
-        this.mapWidth = mapWidth;
-        this.mapHeight = mapHeight;
         this.x = x;
         this.y = y;
 
@@ -76,10 +69,10 @@ public class MovementManager {
                 nextY += dy;
             }
 
-            nextX = Math.max(0, Math.min(nextX, mapWidth - squareSize));
-            nextY = Math.max(0, Math.min(nextY, mapHeight - squareSize));
+            nextX = Math.max(0, Math.min(nextX, Constants.MAP_WIDTH_SIZE - Constants.SQUARE_SIZE));
+            nextY = Math.max(0, Math.min(nextY, Constants.MAP_HEIGHT_SIZE - Constants.SQUARE_SIZE));
 
-            if (!collisionManager.isWallHit(new Rectangle(nextX, nextY, squareSize, squareSize))) {
+            if (!collisionManager.isWallHit(new Rectangle(nextX, nextY, Constants.SQUARE_SIZE, Constants.SQUARE_SIZE))) {
                 x = nextX;
                 y = nextY;
             }

@@ -5,6 +5,7 @@ import java.awt.*;
 import java.io.IOException;
 import network.NetworkHandler;
 import movement.MovementManager;
+import utils.Constants;
 import utils.bullets.Gun;
 import utils.bullets.RayCastManager;
 import utils.input.KeyboardController;
@@ -63,9 +64,9 @@ public class GameController extends JPanel {
 
 
 
-        playerMovementManager = new MovementManager(keyboardController, 50, 50, player, playerCameraManager, collisionManager, SQUARE_SIZE, 1500, 1200);
+        playerMovementManager = new MovementManager(keyboardController, 50, 50, player, playerCameraManager, collisionManager);
 
-        networkHandler = new NetworkHandler("localhost", 12345, playerMovementManager, player);
+        networkHandler = new NetworkHandler("localhost", Constants.SERVER_PORT, playerMovementManager, player);
 
         networkHandler.putToPlayerCoords(targetEnemy);
         networkHandler.startNetworkThreads();
