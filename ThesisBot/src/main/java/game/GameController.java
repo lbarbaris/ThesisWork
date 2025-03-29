@@ -33,7 +33,6 @@ public class GameController extends JPanel {
     private final NetworkHandler networkHandler;
     private final PathfindingAbstractClass pathFinding;
 
-    private final int squareSize = 20;
     private final MapCreator mapCreator;
 
     private final BulletManager bulletManager;

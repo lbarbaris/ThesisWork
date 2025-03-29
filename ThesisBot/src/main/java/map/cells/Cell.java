@@ -1,5 +1,7 @@
 package map.cells;
 
+import utils.Constants;
+
 import java.awt.*;
 
 
@@ -7,10 +9,10 @@ import java.awt.*;
 public class Cell extends Point{
 
     public Cell(int x, int y) {
-        super(x / 20, y / 20);
+        super(x / Constants.SQUARE_SIZE, y / Constants.SQUARE_SIZE);
     }
 
     public Cell(Point point) {
-        super((int) (point.getX() / 20), (int) (point.getY() / 20));
+        super((int) (point.getX() / Constants.SQUARE_SIZE), (int) (point.getY() / Constants.SQUARE_SIZE));
     }
 }
