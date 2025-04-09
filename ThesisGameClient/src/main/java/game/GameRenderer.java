@@ -52,9 +52,11 @@ public class GameRenderer {
 
         renderInstantShot(g2, player, component);
 
+        renderReloadingBar(g2, player);
+
         g2.translate(playerCameraManager.getCameraX(), playerCameraManager.getCameraY());
 
-        renderReloadingBar(g2, player);
+
 
         renderGunInterface(g2, component, player);
 

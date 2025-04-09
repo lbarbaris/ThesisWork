@@ -3,31 +3,23 @@
 # Остановить выполнение при ошибке
 set -e
 
-# Перейти в директорию проекта (если нужно)
+# Перейти в директорию проекта
 cd "$(dirname "$0")"
 
-echo "Clean ThesisCommon..."
-./gradlew :ThesisCommon:clean
+# Функция для принудительной сборки модуля
+force_build_module() {
+    local module=$1
+    echo "Force clean $module..."
+    ./gradlew ":${module}:clean" --no-daemon
 
-echo "Build ThesisCommon..."
-./gradlew :ThesisCommon:build
+    echo "Force build $module..."
+    ./gradlew ":${module}:build" --no-daemon --rerun-tasks --refresh-dependencies
+}
 
-echo "Clean ThesisBot..."
-./gradlew :ThesisBot:clean
+# Принудительная сборка всех модулей
+force_build_module "ThesisCommon"
+force_build_module "ThesisBot"
+force_build_module "ThesisGameClient"
+force_build_module "ThesisGameServer"
 
-echo "Build ThesisBot..."
-./gradlew :ThesisBot:build
-
-echo "Clean ThesisGameClient..."
-./gradlew :ThesisGameClient:clean
-
-echo "Build ThesisGameClient..."
-./gradlew :ThesisGameClient:build
-
-echo "Clean ThesisGameServer..."
-./gradlew :ThesisGameServer:clean
-
-echo "Build ThesisGameServer..."
-./gradlew :ThesisGameServer:build
-
-echo "Build completed!"
+echo "All components rebuilt successfully!"

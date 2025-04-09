@@ -11,14 +11,11 @@ BOT_JAR="ThesisBot/build/libs/ThesisBot-1.0-SNAPSHOT.jar"
 echo "Server launch..."
 java -cp "$SERVER_JAR:$COMMON_JAR" Main &
 
-sleep 3
-
-echo "Client launch..."
-java -cp "$CLIENT_JAR:$COMMON_JAR" Main &
-
-sleep 3
 
 echo "Bot launch..."
 java -cp "$BOT_JAR:$COMMON_JAR" Main &
 
-echo "All components launched!"
+sleep 1
+
+echo "Client launch..."
+java -cp "$CLIENT_JAR:$COMMON_JAR" Main
