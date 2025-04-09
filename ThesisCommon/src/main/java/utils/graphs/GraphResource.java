@@ -80,7 +80,25 @@ public class GraphResource<T> {
 
     public void exportToTxt(String fileName) {
         try {
-            File file = new File(Constants.GRAPH_PATH + fileName);
+            // Определяем путь к файлу
+            String basePath = Constants.GRAPH_PATH;
+            String baseName = fileName;
+            String extension = "";
+
+            int dotIndex = fileName.lastIndexOf('.');
+            if (dotIndex != -1) {
+                baseName = fileName.substring(0, dotIndex);
+                extension = fileName.substring(dotIndex);
+            }
+
+            File file = new File(basePath + fileName);
+            int count = 1;
+            // Если файл уже существует — ищем свободное имя
+            while (file.exists()) {
+                file = new File(basePath + baseName + "_" + count + extension);
+                count++;
+            }
+
             file.getParentFile().mkdirs(); // Создает директории, если их нет
             try (FileWriter writer = new FileWriter(file)) {
                 writer.write(title + "\n");
@@ -94,7 +112,7 @@ public class GraphResource<T> {
                     writer.write("\n");
                 }
 
-                System.out.println("Данные успешно экспортированы в " + Constants.GRAPH_PATH + fileName);
+                System.out.println("Данные успешно экспортированы в " + file.getAbsolutePath());
             }
         } catch (IOException e) {
             System.err.println("Ошибка при записи в файл: " + e.getMessage());

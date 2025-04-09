@@ -11,8 +11,10 @@ public abstract class PathfindingAbstractClass implements PathfindingInterface {
     protected final int cols;
     protected final int[][] distances;
     protected LinkedList<Point> path;
+    protected MapCreator mapCreator;
 
     public PathfindingAbstractClass(MapCreator mapCreator) {
+        this.mapCreator = mapCreator;
         this.matrix = mapCreator.generateMapMatrix();
         this.rows = matrix.length;
         this.cols = matrix[0].length;

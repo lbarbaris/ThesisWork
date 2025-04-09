@@ -17,8 +17,7 @@ import utils.map.MapCreator;
 import bullets.BulletManager;
 import utils.player.Player;
 
-
-import static utils.Constants.SQUARE_SIZE;
+import static utils.Constants.*;
 
 public class GameController extends JPanel {
     private final PlayerCameraManager playerCameraManager;
@@ -43,7 +42,7 @@ public class GameController extends JPanel {
 
         targetEnemy = new Enemy(true, 200, 200, Constants.PLAYER_MAX_HP,  System.currentTimeMillis());
 
-        mapCreator = new MapCreator((short) 3);
+        mapCreator = new MapCreator((short) 4);
 /*        System.out.println(
                 Arrays.deepToString(mapCreator.generateMapMatrix())
                         .replace("], ", "]\n")  // Перенос строки после каждой строки массива
@@ -54,7 +53,7 @@ public class GameController extends JPanel {
         setFocusable(true);
 
         Gun defaultGun = new Gun(1000, 12.0, 3.0, 1, 1000, 1);
-        player = new Player(50, 50, defaultGun);
+        player = new Player(PLAYER_SPAWN_X, PLAYER_SPAWN_Y, defaultGun);
         KeyboardController keyboardController = new KeyboardController(player);
 
         addKeyListener(keyboardController);
@@ -64,7 +63,7 @@ public class GameController extends JPanel {
 
 
 
-        playerMovementManager = new MovementManager(keyboardController, 50, 50, player, playerCameraManager, collisionManager);
+        playerMovementManager = new MovementManager(keyboardController, PLAYER_SPAWN_X, PLAYER_SPAWN_Y, player, playerCameraManager, collisionManager);
 
         networkHandler = new NetworkHandler(Constants.SERVER_ADDRESS, Constants.SERVER_PORT, playerMovementManager, player);
 

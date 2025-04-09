@@ -1,5 +1,6 @@
 package map.paths;
 
+import map.cells.Cell;
 import utils.map.MapCreator;
 
 import java.awt.*;
@@ -13,7 +14,7 @@ public class WaveAlgorithm extends PathfindingAbstractClass {
     }
 
     @Override
-    public void findPath(Point start, Point end) {
+    public void findPath(Cell start, Cell end) {
         if (!isValid(start) || !isValid(end)) {
             throw new IllegalArgumentException("Invalid start or end point");
         }

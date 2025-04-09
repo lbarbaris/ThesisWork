@@ -6,28 +6,28 @@ set -e
 # Перейти в директорию проекта (если нужно)
 cd "$(dirname "$0")"
 
-echo "Очищение ThesisCommon..."
+echo "Clean ThesisCommon..."
 ./gradlew :ThesisCommon:clean
 
-echo "Сборка ThesisCommon..."
+echo "Build ThesisCommon..."
 ./gradlew :ThesisCommon:build
 
-echo "Очищение ThesisBot..."
+echo "Clean ThesisBot..."
 ./gradlew :ThesisBot:clean
 
-echo "Сборка ThesisBot..."
+echo "Build ThesisBot..."
 ./gradlew :ThesisBot:build
 
-echo "Очищение ThesisGameClient..."
+echo "Clean ThesisGameClient..."
 ./gradlew :ThesisGameClient:clean
 
-echo "Сборка ThesisGameClient..."
+echo "Build ThesisGameClient..."
 ./gradlew :ThesisGameClient:build
 
-echo "Очищение ThesisGameServer..."
+echo "Clean ThesisGameServer..."
 ./gradlew :ThesisGameServer:clean
 
-echo "Сборка ThesisGameServer..."
+echo "Build ThesisGameServer..."
 ./gradlew :ThesisGameServer:build
 
-echo "Сборка завершена!"
+echo "Build completed!"

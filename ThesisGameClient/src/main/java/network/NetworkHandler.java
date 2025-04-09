@@ -120,7 +120,7 @@ public class NetworkHandler {
             graphResource.addValue(0, (long) serverPacketNumber);
             graphResource.addValue(1, System.currentTimeMillis() - packetNumbers.get(serverPacketNumber));
         } else if (!isGraphSaved){
-            graphResource.exportToTxt("test3.txt");
+            //graphResource.exportToTxt("test3.txt");
             isGraphSaved = true;
         }
 

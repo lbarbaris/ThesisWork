@@ -68,8 +68,6 @@ public class BulletManager extends Thread {
                 double startX = player.getX();
                 double startY = player.getY();
 
-                System.out.println(startX + " " + startY + " " + mouseX + " " +mouseY);
-
                 try {
                     networkHandler.sendShootRequest((int) startX, (int) startY, (int) mouseX, (int) mouseY);
                 } catch (IOException e) {

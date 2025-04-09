@@ -38,6 +38,28 @@ public class MapCreator {
                 map.add(new Block(60, 340));  // Исправлено с (50, 340)
                 mapName = "testMap3";
                 break;
+            case 4:
+                addBorders();
+                for (int y = 100; y < Constants.MAP_HEIGHT_SIZE - 100; y += 100) {
+                    for (int x = 100; x < Constants.MAP_WIDTH_SIZE - 100; x += 120) {
+                        // Левая вертикаль подковы
+                        map.add(new Block(x, y - 20));
+                        map.add(new Block(x, y));
+                        map.add(new Block(x, y + 20));
+
+                        // Нижняя горизонталь подковы
+                        map.add(new Block(x + 20, y + 20));
+                        map.add(new Block(x + 40, y + 20));
+                        map.add(new Block(x + 60, y + 20));
+
+                        // Правая вертикаль подковы
+                        map.add(new Block(x + 60, y));
+                        map.add(new Block(x + 60, y - 20));
+                        map.add(new Block(x + 60, y + 20));
+                    }
+                }
+                mapName = "horseshoePatternMap";
+                break;
         }
     }
 

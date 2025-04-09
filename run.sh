@@ -8,17 +8,17 @@ SERVER_JAR="ThesisGameServer/build/libs/ThesisGameServer-1.0-SNAPSHOT.jar"
 CLIENT_JAR="ThesisGameClient/build/libs/ThesisGameClient-1.0-SNAPSHOT.jar"
 BOT_JAR="ThesisBot/build/libs/ThesisBot-1.0-SNAPSHOT.jar"
 
-echo "Запуск сервера..."
-java -cp "$SERVER_JAR:$COMMON_JAR" server.SimpleGameServer &
+echo "Server launch..."
+java -cp "$SERVER_JAR:$COMMON_JAR" Main &
 
 sleep 3
 
-echo "Запуск клиента..."
+echo "Client launch..."
 java -cp "$CLIENT_JAR:$COMMON_JAR" Main &
 
 sleep 3
 
-echo "Запуск бота..."
+echo "Bot launch..."
 java -cp "$BOT_JAR:$COMMON_JAR" Main &
 
-echo "Все компоненты запущены!"
+echo "All components launched!"

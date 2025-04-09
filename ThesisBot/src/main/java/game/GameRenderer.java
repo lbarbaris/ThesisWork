@@ -23,7 +23,7 @@ public class GameRenderer {
     private final MovementManager playerMovementManager;
     private final PathfindingAbstractClass pathFindingAbstractClass;
     private final NetworkHandler networkHandler;
-    private BulletManager bulletManager;
+    private final BulletManager bulletManager;
     private long lastShot;
 
 
@@ -54,6 +54,8 @@ public class GameRenderer {
 
         renderInstantShot(g2, player, component);
 
+        renderPath(g2);
+
         g2.translate(playerCameraManager.getCameraX(), playerCameraManager.getCameraY());
 
         renderReloadingBar(g2, player);
@@ -62,7 +64,7 @@ public class GameRenderer {
 
         renderHP(g2, component, player);
 
-        renderPath(g2);
+
 
     }
 

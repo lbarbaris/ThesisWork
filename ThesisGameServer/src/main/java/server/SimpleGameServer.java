@@ -23,7 +23,7 @@ public class SimpleGameServer {
 
 
     public SimpleGameServer(int port) throws Exception {
-        this.mapCreator = new MapCreator((short) 3);
+        this.mapCreator = new MapCreator((short) 4);
         this.collisionManager = new CollisionManager(mapCreator.getMap());
         this.socket = new DatagramSocket(port);
     }
@@ -193,7 +193,6 @@ public class SimpleGameServer {
                     Enemy2 state = entry.getValue();
 
                     StringBuilder response = new StringBuilder(state.toString());
-                    System.out.println(response);
 
                     for (Map.Entry<String, Enemy2> entry1: playerStates.entrySet()){
                         if (!Objects.equals(entry1.getKey(), entry.getKey())){
@@ -224,12 +223,5 @@ public class SimpleGameServer {
         new Timer(16, e -> renderer.repaint()).start();
     }
 
-    public static void main(String[] args) {
-        try {
-            SimpleGameServer server = new SimpleGameServer(Constants.SERVER_PORT);
-            server.start();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+
 }

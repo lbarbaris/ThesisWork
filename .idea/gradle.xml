@@ -9,9 +9,10 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/ThesisBot" />
+            <option value="$PROJECT_DIR$/ThesisCommon" />
             <option value="$PROJECT_DIR$/ThesisGameClient" />
             <option value="$PROJECT_DIR$/ThesisGameServer" />
-            <option value="$PROJECT_DIR$/common" />
           </set>
         </option>
       </GradleProjectSettings>
