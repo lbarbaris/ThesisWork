@@ -2,6 +2,7 @@ package utils.bullets;
 
 import utils.Constants;
 import utils.map.Block;
+import utils.map.CollisionManager;
 import utils.map.MapCreator;
 import utils.network.Enemy;
 import utils.player.Player;
@@ -55,14 +56,14 @@ public class RayCastManager {
         }
 
         // --- 2. Проверяем стены
-        double maxRayLength = 1000;
-        for (Block block : mapCreator.getMap()) {
-            Rectangle wall = new Rectangle(block.x, block.y, block.width, block.height);
+        double maxRayLength = 100000;
+        for (Block block : mapCreator.getWalls()) {
+            Block wall = new Block(block.x, block.y, block.getId(), block.isAir());
 
             for (double t = 0; t < maxRayLength; t += 1) {
                 int checkX = (int) (px + dx * t);
                 int checkY = (int) (py + dy * t);
-                if (wall.contains(checkX, checkY)) {
+                if (wall.contains(checkX, checkY) && !wall.isAir()) {
                     if (t < result.distance) {
                         result.type = HitType.WALL;
                         result.distance = t;

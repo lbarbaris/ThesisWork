@@ -13,6 +13,23 @@
             <option value="$PROJECT_DIR$/ThesisCommon" />
             <option value="$PROJECT_DIR$/ThesisGameClient" />
             <option value="$PROJECT_DIR$/ThesisGameServer" />
+            <option value="$PROJECT_DIR$/ThesisSettingsServer" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/ThesisMasterServer" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/ThesisMasterServer" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/ThesisSettingsServer" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/ThesisSettingsServer" />
           </set>
         </option>
       </GradleProjectSettings>

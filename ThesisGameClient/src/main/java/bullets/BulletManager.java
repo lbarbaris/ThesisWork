@@ -1,10 +1,8 @@
 package bullets;
 
 import utils.Constants;
-import utils.bullets.Gun;
-import utils.bullets.HitType;
-import utils.bullets.RayCastManager;
-import utils.bullets.RaycastHit;
+import utils.bullets.*;
+import utils.map.Block;
 import utils.network.Enemy;
 import network.NetworkHandler;
 import utils.player.Player;
@@ -12,7 +10,10 @@ import utils.player.Player;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.HashMap;
+import java.util.Random;
 
 import static java.lang.Math.atan2;
 
@@ -22,6 +23,8 @@ public class BulletManager extends Thread {
     private final Player player;
     private final Enemy targetEnemy;
     private NetworkHandler networkHandler;
+    private final List<Particle> particles = new ArrayList<>();
+    private Random random = new Random();
 
 
     private volatile boolean shooting;
@@ -85,7 +88,30 @@ public class BulletManager extends Thread {
                     System.out.println("Пуля попала в стену на расстоянии " + hit.distance);
                     gun.shoot();
                     oneShot = true;
+                    // Получаем цвет стены в точке попадания
+                    //Color wallColor = getWallColorAt(hit.hitPoint);
+                    //createWallParticles(hit.hitPoint, wallColor);
                 }
+
+/*                private Color getWallColorAt(Point hitPoint) {
+                    // Проверяем, попадает ли точка в какой-либо блок стены
+                    for (Block block : walls) {
+                        if (block.getBounds().contains(hitPoint)) {
+                            // В зависимости от типа блока возвращаем соответствующий цвет
+                            switch (block.getId()) {
+                                case 1: // Кирпич
+                                    return new Color(150, 70, 50);
+                                case 2: // Листва
+                                    return new Color(50, 120, 50);
+                                case 3: // Трава
+                                    return new Color(140, 200, 100);
+                                default:
+                                    return Color.GRAY;
+                            }
+                        }
+                    }
+                    return Color.GRAY; // цвет по умолчанию
+                }*/
 
                 if (hit.type == HitType.ENEMY) {
                     Enemy enemy = hit.hitEnemy;
@@ -131,6 +157,53 @@ public class BulletManager extends Thread {
 
     public Point getLastHitPoint() {
         return lastHitPoint;
+    }
+
+    private void createWallParticles(Point hitPoint, Color color) {
+        for (int i = 0; i < 15; i++) {
+            int speed = 1 + random.nextInt(3);
+            double angle = random.nextDouble() * Math.PI * 2;
+            Point velocity = new Point(
+                    (int)(Math.cos(angle) * speed),
+                    (int)(Math.sin(angle) * speed)
+            );
+            particles.add(new Particle(
+                    color,
+                    new Point(hitPoint.x, hitPoint.y),
+                    velocity,
+                    500 + random.nextInt(500), // время жизни
+                    1 + random.nextInt(3) // размер
+            ));
+        }
+    }
+
+    private void createBloodParticles(Point hitPoint) {
+        for (int i = 0; i < 20; i++) {
+            int speed = 2 + random.nextInt(4);
+            double angle = random.nextDouble() * Math.PI * 2;
+            Point velocity = new Point(
+                    (int)(Math.cos(angle) * speed),
+                    (int)(Math.sin(angle) * speed)
+            );
+            // Разные оттенки красного
+            Color bloodColor = new Color(
+                    150 + random.nextInt(100),
+                    random.nextInt(30),
+                    random.nextInt(30)
+            );
+            particles.add(new Particle(
+                    bloodColor,
+                    new Point(hitPoint.x, hitPoint.y),
+                    velocity,
+                    300 + random.nextInt(400),
+                    2 + random.nextInt(3)
+            ));
+        }
+    }
+
+    public List<Particle> getParticles() {
+        particles.removeIf(p -> !p.isAlive());
+        return particles;
     }
 
 

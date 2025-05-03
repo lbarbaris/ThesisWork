@@ -80,7 +80,7 @@ public class GameRenderer {
 
         for (Map.Entry<String, Enemy> entry : coords.entrySet()) {
             Enemy enemy = entry.getValue();
-            Point interpPos = enemy.getInterpolatedPosition(renderTime);
+            Point interpPos = new Point(0, 0); // enemy.getInterpolatedPosition(renderTime);
             if (!hitTimes.isEmpty() && hitTimes.get(entry.getValue()) != null && (System.currentTimeMillis() - hitTimes.get(entry.getValue()) < Constants.INTERPOLATION_DELAY_MS)){
                 g2.setColor(Color.RED);
             }
@@ -153,7 +153,7 @@ public class GameRenderer {
     }
 
     private void renderMap(Graphics2D g2, MapCreator mapCreator){
-        for (Shape shape : mapCreator.getMap()) {
+        for (Shape shape : mapCreator.getWalls()) {
             g2.fillRect(shape.getBounds().x, shape.getBounds().y, shape.getBounds().width, shape.getBounds().height);
         }
     }

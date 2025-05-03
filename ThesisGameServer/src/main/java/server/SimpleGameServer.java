@@ -9,13 +9,17 @@ import java.awt.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static java.lang.Math.abs;
+import static utils.Constants.SERVER_SEND_SLEEP_MS;
+
 public class SimpleGameServer {
+    private long packetPreparationStartTime;
+    private int pingCounter;
     private final MapCreator mapCreator;
     private final DatagramSocket socket;
     private final CollisionManager collisionManager;
@@ -23,8 +27,10 @@ public class SimpleGameServer {
 
 
     public SimpleGameServer(int port) throws Exception {
-        this.mapCreator = new MapCreator((short) 4);
-        this.collisionManager = new CollisionManager(mapCreator.getMap());
+        pingCounter = 1;
+        this.packetPreparationStartTime = 0;
+        this.mapCreator = new MapCreator((short) 3);
+        this.collisionManager = new CollisionManager(mapCreator.getWalls());
         this.socket = new DatagramSocket(port);
     }
 
@@ -79,8 +85,8 @@ public class SimpleGameServer {
 
                     Enemy2 state = playerStates.get(playerKey);
                     int maxDistance = 5; // Максимально допустимый шаг
-                    int dxAllowed = Math.min(maxDistance, Math.abs(clientX - state.x));
-                    int dyAllowed = Math.min(maxDistance, Math.abs(clientY - state.y));
+                    int dxAllowed = Math.min(maxDistance, abs(clientX - state.x));
+                    int dyAllowed = Math.min(maxDistance, abs(clientY - state.y));
 
                     int newX = state.x + (int) Math.signum(clientX - state.x) * dxAllowed;
                     int newY = state.y + (int) Math.signum(clientY - state.y) * dyAllowed;
@@ -159,7 +165,7 @@ public class SimpleGameServer {
             }
         }
 
-        // Затем проверяем попадание в стену
+
         for (double t = 0; t < maxRayLength; t += step) {
             int checkX = (int) (px + dx * t);
             int checkY = (int) (py + dy * t);
@@ -169,7 +175,6 @@ public class SimpleGameServer {
                 return;
             }
 
-            // Если враг уже найден и расстояние до точки больше — выходим
             if (hitTarget != null && t > closestEnemyDist) {
                 break;
             }
@@ -185,7 +190,7 @@ public class SimpleGameServer {
     private void sendPackets() {
         try {
             while (true) {
-                Thread.sleep(50);
+                packetPreparationStartTime = System.currentTimeMillis();
                 for (Map.Entry<String, Enemy2> entry : playerStates.entrySet()) {
                     String[] keyParts = entry.getKey().split(":");
                     InetAddress address = InetAddress.getByName(keyParts[0].substring(1));
@@ -200,11 +205,19 @@ public class SimpleGameServer {
                         }
                     }
 
-
                     byte[] responseData = response.toString().getBytes();
                     DatagramPacket responsePacket = new DatagramPacket(responseData, responseData.length, address, port);
                     socket.send(responsePacket);
                 }
+                Thread.sleep(SERVER_SEND_SLEEP_MS);
+/*                if (pingCounter % (1200 / PING_PER_MINUTE) == 0){
+                    Thread.sleep(1050);
+                }
+                else {
+
+                }*/
+                pingCounter++;
+                //Thread.sleep(abs(8 - (System.currentTimeMillis() - packetPreparationStartTime)));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -222,6 +235,4 @@ public class SimpleGameServer {
 
         new Timer(16, e -> renderer.repaint()).start();
     }
-
-
 }

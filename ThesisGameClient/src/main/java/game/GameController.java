@@ -36,23 +36,23 @@ public class GameController extends JPanel {
     private final Player player;
     private final GameRenderer gameRenderer;
 
-    public GameController() throws IOException {
+    public GameController(String serverAddress, String serverPort) throws IOException {
         playerCameraManager = new PlayerCameraManager(Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT);
 
 
         targetEnemy = new Enemy(true, 200, 200, Constants.PLAYER_MAX_HP,  System.currentTimeMillis());
 
-        mapCreator = new MapCreator((short) 4);
+        mapCreator = new MapCreator((short) 3);
 /*        System.out.println(
                 Arrays.deepToString(mapCreator.generateMapMatrix())
                         .replace("], ", "]\n")  // Перенос строки после каждой строки массива
                         .replace("[[", "[\n[")  // Перенос строки после первой скобки
                         .replace("]]", "]\n]")  // Перенос строки перед закрывающей скобкой
         );*/
-        collisionManager = new CollisionManager(mapCreator.getMap());
+        collisionManager = new CollisionManager(mapCreator.getWalls());
         setFocusable(true);
 
-        Gun defaultGun = new Gun(1000, 12.0, 3.0, 1, 1000, 1);
+        Gun defaultGun = new Gun(10, 12.0, 3.0, 30, 1000, 1);
         player = new Player(PLAYER_SPAWN_X, PLAYER_SPAWN_Y, defaultGun);
         KeyboardController keyboardController = new KeyboardController(player);
 
@@ -60,12 +60,9 @@ public class GameController extends JPanel {
 
         rayCastManager = new RayCastManager(player, mapCreator);
 
-
-
-
         playerMovementManager = new MovementManager(keyboardController, PLAYER_SPAWN_X, PLAYER_SPAWN_Y, player, playerCameraManager, collisionManager);
 
-        networkHandler = new NetworkHandler(Constants.SERVER_ADDRESS, Constants.SERVER_PORT, playerMovementManager, player);
+        networkHandler = new NetworkHandler(serverAddress, serverPort, playerMovementManager, player);
 
         networkHandler.putToPlayerCoords(targetEnemy);
         networkHandler.startNetworkThreads();

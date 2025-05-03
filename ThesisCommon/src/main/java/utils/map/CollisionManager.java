@@ -13,8 +13,8 @@ public class CollisionManager {
 
     public boolean isWallHit(Shape bullet){
         boolean res = false;
-        for (Shape shape : map) {
-            if (shape.intersects((Rectangle2D) bullet)) {
+        for (Block block : map) {
+            if (block.intersects((Rectangle2D) bullet) && !block.isAir()) {
                 res = true;
                 break;
             }

@@ -15,4 +15,13 @@ public class EnemyFrame {
     public Point toPoint() {
         return new Point(x, y);
     }
+
+    @Override
+    public String toString() {
+        return "EnemyFrame{" +
+                "x=" + x +
+                ", y=" + y +
+                ", timestamp=" + timestamp +
+                '}';
+    }
 }

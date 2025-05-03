@@ -10,12 +10,14 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class GraphResource<T> {
-    private final String title;
+    private String title;
     private final String xLabel;
     private final String yLabel;
     private final List<LinkedList<T>> data;
+    private int counter;
 
     public GraphResource(String title, String xLabel, String yLabel) {
+        this.counter = 0;
         this.title = title;
         this.xLabel = xLabel;
         this.yLabel = yLabel;
@@ -43,20 +45,10 @@ public class GraphResource<T> {
 
     }
 
-    private Number subtractNumbers(T oldValue, T value) {
-        if (oldValue instanceof Integer) {
-            return (Integer) oldValue - (Integer) value;
-        } else if (oldValue instanceof Long) {
-            return (Long) oldValue - (Long) value;
-        } else if (oldValue instanceof Float) {
-            return (Float) oldValue - (Float) value;
-        } else if (oldValue instanceof Double) {
-            return (Double) oldValue - (Double) value;
-        }
-        return (Number) oldValue;
-    }
-
     public void addValue(int seriesIndex, T value) {
+        if (seriesIndex == 1){
+            counter++;
+        }
         if (seriesIndex < 0 || seriesIndex >= data.size()) {
             throw new IndexOutOfBoundsException("Серия с индексом " + seriesIndex + " не существует.");
         }
@@ -96,6 +88,7 @@ public class GraphResource<T> {
             // Если файл уже существует — ищем свободное имя
             while (file.exists()) {
                 file = new File(basePath + baseName + "_" + count + extension);
+                this.title = baseName + "_" + count;
                 count++;
             }
 
@@ -113,9 +106,27 @@ public class GraphResource<T> {
                 }
 
                 System.out.println("Данные успешно экспортированы в " + file.getAbsolutePath());
+
             }
         } catch (IOException e) {
             System.err.println("Ошибка при записи в файл: " + e.getMessage());
         }
+    }
+
+    public void extendSeries() {
+        // Получаем первую и вторую серии
+        LinkedList<T> firstSeries = data.get(0);
+        LinkedList<T> secondSeries = data.get(1);
+
+
+        // Добавляем числа в первую серию от inputNumber до endValue
+        for (int i = firstSeries.size(); i <= 1200; i++) {
+            firstSeries.add((T) Integer.valueOf(i));
+            secondSeries.add((T) Integer.valueOf(0));
+        }
+    }
+
+    public String getTitle() {
+        return title;
     }
 }

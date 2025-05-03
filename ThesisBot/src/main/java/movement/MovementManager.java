@@ -7,9 +7,11 @@ import utils.player.PlayerCameraManager;
 import utils.map.CollisionManager;
 
 import java.awt.*;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
+
+import static utils.Constants.BOT_SPAWN_X;
+import static utils.Constants.BOT_SPAWN_Y;
 
 public class MovementManager {
     private final Queue<MovementCommand> commandHistory = new ConcurrentLinkedQueue<>();
@@ -17,6 +19,7 @@ public class MovementManager {
     private final PlayerCameraManager playerCameraManager;
     private final CollisionManager collisionManager;
     private LinkedList<Point> botPath = new LinkedList<>();
+    private boolean emptyPath;
 
     private int x, dx, y, dy; // Локальные координаты
 
@@ -25,7 +28,6 @@ public class MovementManager {
             Player player,
             PlayerCameraManager playerCameraManager,
             CollisionManager collisionManager){
-
         this.player = player;
         this.playerCameraManager = playerCameraManager;
         this.collisionManager = collisionManager;
@@ -48,6 +50,7 @@ public class MovementManager {
             int targetX = nextPoint.x * Constants.SQUARE_SIZE;
             int targetY = nextPoint.y * Constants.SQUARE_SIZE;
 
+
             if (x < targetX) dx = 1;
             if (x > targetX) dx = -1;
             if (y < targetY) dy = 1;
@@ -57,6 +60,7 @@ public class MovementManager {
                 botPath.removeFirst();
             }
         }
+
 
         for (int i = 0; i < speed; i++) {
             int nextX = x + dx;
@@ -69,6 +73,7 @@ public class MovementManager {
                 x = nextX;
                 y = nextY;
             }
+
         }
 
         player.setPosition(x, y);
@@ -76,11 +81,11 @@ public class MovementManager {
     }
 
     public void applyServerData(int serverX, int serverY, long serverTimestamp){
-        x = serverX;
+/*        x = serverX;
         y = serverY;
 
         // Очищаем обработанные сервером команды
-        commandHistory.removeIf(cmd -> cmd.timestamp <= serverTimestamp);
+        commandHistory.removeIf(cmd -> cmd.timestamp <= serverTimestamp);*/
     }
 
     public void setPath(LinkedList<Point> path) {

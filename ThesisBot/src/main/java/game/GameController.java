@@ -7,8 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import map.cells.Cell;
-import map.paths.AStarAlgorithm;
-import map.paths.WaveAlgorithm;
+import map.paths.CycleAlgorithm;
 import utils.bullets.RayCastManager;
 
 import map.paths.PathfindingAbstractClass;
@@ -54,11 +53,11 @@ public class GameController extends JPanel {
 
         targetEnemy = new Enemy(true, 200, 200, Constants.PLAYER_MAX_HP,  System.currentTimeMillis());
 
-        mapCreator = new MapCreator((short) 4);
+        mapCreator = new MapCreator((short) 3);
 
 
-        pathFinding = new AStarAlgorithm(mapCreator);
-        collisionManager = new CollisionManager(mapCreator.getMap());
+        pathFinding = new CycleAlgorithm(mapCreator);
+        collisionManager = new CollisionManager(mapCreator.getWalls());
         setFocusable(true);
 
         Gun defaultGun = new Gun(1000, 12.0, 3.0, 100, 2500, (short) 10);
@@ -109,7 +108,7 @@ public class GameController extends JPanel {
             long renderTime = System.currentTimeMillis() - Constants.INTERPOLATION_DELAY_MS;
 
             for (Map.Entry<String, Enemy> entry1 : coords.entrySet()) {
-                double checkDistance = playerMovementManager.getCell().distance(new Cell(entry1.getValue().getInterpolatedPosition(renderTime)));
+                double checkDistance = 0;// playerMovementManager.getCell().distance(new Cell(entry1.getValue().getInterpolatedPosition(renderTime)));
 
                 if (checkDistance < distance && !entry1.getValue().isBot()) {
                     distance = checkDistance;
@@ -122,7 +121,7 @@ public class GameController extends JPanel {
 
                 if (!Constants.IS_CYCLE_BOT) {
                     var botCell = new Cell(playerMovementManager.getX(), playerMovementManager.getY());
-                    var playerCell = new Cell(coords.get(closestPlayerName).getInterpolatedPosition(renderTime).x, coords.get(closestPlayerName).getInterpolatedPosition(renderTime).y);
+                    var playerCell = new Cell(0,0); //coords.get(closestPlayerName).getInterpolatedPosition(renderTime).x, coords.get(closestPlayerName).getInterpolatedPosition(renderTime).y);
                     pathFinding.findPath(botCell, playerCell);
                 }
                 else {
@@ -131,15 +130,15 @@ public class GameController extends JPanel {
                 }
 
                 if (graphCounter < Constants.PATH_MEASUREMENT_SIZE){
-                    graphResource.addValue(0, (long) graphCounter);
+/*                    graphResource.addValue(0, (long) graphCounter);
                     graphResource.addValue(1, (System.nanoTime() - startTime));
-                    graphCounter++;
+                    graphCounter++;*/
                 }
                 else if (!isGraphSaved){
-                    graphResource.exportToTxt(pathFinding.getClass().
+/*                    graphResource.exportToTxt(pathFinding.getClass().
                             getSimpleName() + "_" +
                             Constants.MAP_WIDTH_SIZE / Constants.SQUARE_SIZE + "x" +
-                            Constants.MAP_HEIGHT_SIZE / Constants.SQUARE_SIZE + ".txt");
+                            Constants.MAP_HEIGHT_SIZE / Constants.SQUARE_SIZE + ".txt");*/
                     isGraphSaved = true;
                 }
 

@@ -15,7 +15,7 @@ public class MouseController {
             @Override
             public void mousePressed(MouseEvent e) {
                 bulletManager.setShooting(true);
-                bulletManager.startShootingLoop();
+/*                bulletManager.startShootingLoop();*/
             }
             @Override
             public void mouseReleased(MouseEvent e) {
