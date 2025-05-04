@@ -66,12 +66,14 @@ public class GameController extends JPanel {
 
         networkHandler.putToPlayerCoords(targetEnemy);
         networkHandler.startNetworkThreads();
-        bulletManager = new BulletManager(player, this, targetEnemy, rayCastManager, networkHandler);
+        bulletManager = new BulletManager(player, this, targetEnemy, rayCastManager, networkHandler, mapCreator);
         mouseController = new MouseController(this, bulletManager);
         bulletManager.setPlayerCoords(networkHandler.getPlayerCoords());
         bulletManager.start();
 
         gameRenderer = new GameRenderer(playerCameraManager,  mapCreator, playerMovementManager,  networkHandler, SQUARE_SIZE, bulletManager);
+
+        playerMovementManager.setGameRenderer(gameRenderer);
     }
 
     @Override

@@ -3,6 +3,7 @@ package bullets;
 import utils.Constants;
 import utils.bullets.*;
 import utils.map.Block;
+import utils.map.MapCreator;
 import utils.network.Enemy;
 import network.NetworkHandler;
 import utils.player.Player;
@@ -16,9 +17,11 @@ import java.util.HashMap;
 import java.util.Random;
 
 import static java.lang.Math.atan2;
+import static java.lang.Math.max;
 
 public class BulletManager extends Thread {
     private final HashMap<Enemy, Long> enemyHitTimes;
+    private final MapCreator mapCreator;
     private final JPanel panel;
     private final Player player;
     private final Enemy targetEnemy;
@@ -38,7 +41,8 @@ public class BulletManager extends Thread {
         this.playerCoords = playerCoords;
     }
 
-    public BulletManager(Player player, JPanel panel, Enemy targetEnemy, RayCastManager rayCastManager, NetworkHandler networkHandler) {
+    public BulletManager(Player player, JPanel panel, Enemy targetEnemy, RayCastManager rayCastManager, NetworkHandler networkHandler, MapCreator mapCreator) {
+        this.mapCreator = mapCreator;
         this.networkHandler = networkHandler;
         this.rayCastManager = rayCastManager;
         this.player = player;
@@ -89,35 +93,16 @@ public class BulletManager extends Thread {
                     gun.shoot();
                     oneShot = true;
                     // Получаем цвет стены в точке попадания
-                    //Color wallColor = getWallColorAt(hit.hitPoint);
-                    //createWallParticles(hit.hitPoint, wallColor);
+                    Color wallColor = getWallColorAt(hit.hitPoint);
+                    createWallParticles(hit.hitPoint, wallColor);
                 }
-
-/*                private Color getWallColorAt(Point hitPoint) {
-                    // Проверяем, попадает ли точка в какой-либо блок стены
-                    for (Block block : walls) {
-                        if (block.getBounds().contains(hitPoint)) {
-                            // В зависимости от типа блока возвращаем соответствующий цвет
-                            switch (block.getId()) {
-                                case 1: // Кирпич
-                                    return new Color(150, 70, 50);
-                                case 2: // Листва
-                                    return new Color(50, 120, 50);
-                                case 3: // Трава
-                                    return new Color(140, 200, 100);
-                                default:
-                                    return Color.GRAY;
-                            }
-                        }
-                    }
-                    return Color.GRAY; // цвет по умолчанию
-                }*/
 
                 if (hit.type == HitType.ENEMY) {
                     Enemy enemy = hit.hitEnemy;
                     enemy.doDamage(gun.getDamage());
                     enemyHitTimes.put(enemy, System.currentTimeMillis());
                     System.out.println("Попадание! Цель: " + enemy);
+                    createBloodParticles(hit.hitPoint);
                     if (enemy == targetEnemy) {
                         System.out.println("Попал по мишени!");
                         if (enemy.getHp() <= 0) {
@@ -139,6 +124,21 @@ public class BulletManager extends Thread {
         });
 
         shootingThread.start();
+    }
+
+
+    private Color getWallColorAt(Point hitPoint) {
+        for (Block block : mapCreator.getWalls()) {
+            if (block.getBounds().contains(hitPoint)) {
+                return switch (block.getId()) {
+                    case 1 -> new Color(150, 70, 50);
+                    case 2 -> new Color(50, 120, 50);
+                    case 3 -> new Color(140, 200, 100);
+                    default -> Color.GRAY;
+                };
+            }
+        }
+        return Color.GRAY;
     }
 
     public boolean getOneShot(){

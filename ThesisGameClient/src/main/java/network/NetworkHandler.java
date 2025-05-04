@@ -44,6 +44,9 @@ public class NetworkHandler {
 
     private boolean isPredictedSaved;
 
+    private Point uniquePoint;
+    private Point realPoint;
+
     private Set<Point> uniquePoints;
     private Set<Point> realPoints;
     private final GraphResource<Double> predictedDotsGraph;
@@ -179,13 +182,15 @@ public class NetworkHandler {
             boolean bot = Boolean.parseBoolean(parts[i + 3]);
 
             Enemy enemy = PlayerCoords.getOrDefault(id, new Enemy(bot, x, y, Constants.PLAYER_MAX_HP, serverTimeStamp));
-            if (System.currentTimeMillis() - startTime > randomTime) {
-                if (predictedDotsCounter < PREDICT_SIZE) {
+/*            if (System.currentTimeMillis() - startTime > randomTime) {*/
+/*                if (predictedDotsCounter < PREDICT_SIZE) {*/
                    int j = 50;
                         var point = new Point(enemy.getPredictedPositionWithAcceleration(System.currentTimeMillis(), j));
                         var primitivePoint = new Point(enemy.getPredictedPosition(System.currentTimeMillis(), j));
                         var smartPoint = new Point(enemy.getSmartPredictedPosition(System.currentTimeMillis(), j));
                         var padeSmartPoint = new Point(enemy.getPadeSmartPredictedPosition(System.currentTimeMillis(), j));
+                        uniquePoint = primitivePoint;
+                        realPoint = extrapolationDotsCounter.getDistanceToNearestPoint(primitivePoint);
                         uniquePoints.add(primitivePoint);
                         realPoints.add(extrapolationDotsCounter.getDistanceToNearestPoint(primitivePoint));
 /*                        var distance = extrapolationDotsCounter.getDistanceToNearestPoint(point);
@@ -200,7 +205,7 @@ public class NetworkHandler {
                         polynomDotsGraph.addValue(1, smartDistance);
                         polynomPadeDotsGraph.addValue(0, (double) predictedDotsCounter);
                         polynomPadeDotsGraph.addValue(1, padeSmartDistance);*/
-                    predictedDotsCounter++;
+/*                    predictedDotsCounter++;
                 } else if (!isPredictedSaved) {
                     predictedDotsGraph.extendSeries();
                     primitivePredictedDotsGraph.extendSeries();
@@ -211,9 +216,9 @@ public class NetworkHandler {
                     primitivePredictedDotsGraph.exportToTxt(primitivePredictedDotsGraph.getTitle() + ".txt");
                     polynomPadeDotsGraph.exportToTxt(polynomPadeDotsGraph.getTitle() + ".txt");
                     polynomDotsGraph.exportToTxt(polynomDotsGraph.getTitle() + ".txt");
-                }
-                startTime = System.currentTimeMillis();
-            }
+                }*/
+/*                startTime = System.currentTimeMillis();*/
+/*            }*/
 
             enemy.addFrame(x, y, serverTimeStamp);
             PlayerCoords.put(id, enemy);
@@ -243,5 +248,13 @@ public class NetworkHandler {
 
     public Set<Point> getRealPoints() {
         return realPoints;
+    }
+
+    public Point getUniquePoint() {
+        return uniquePoint;
+    }
+
+    public Point getRealPoint() {
+        return realPoint;
     }
 }

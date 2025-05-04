@@ -2,6 +2,7 @@ package movement;
 
 
 
+import game.GameRenderer;
 import utils.Constants;
 import utils.input.KeyboardController;
 import utils.map.CollisionManager;
@@ -18,8 +19,13 @@ public class MovementManager {
     private final Player player;
     private final PlayerCameraManager playerCameraManager;
     private final CollisionManager collisionManager;
+    private GameRenderer gameRenderer;
 
     private int x, dx, y, dy; // Локальные координаты
+
+    public void setGameRenderer(GameRenderer gameRenderer) {
+        this.gameRenderer = gameRenderer;
+    }
 
     public MovementManager(
             KeyboardController keyboardController,
@@ -76,6 +82,7 @@ public class MovementManager {
                 x = nextX;
                 y = nextY;
             }
+            gameRenderer.createMovementParticles(player, dx, dy);
         }
 
         // Обновляем координаты игрока и камеры
