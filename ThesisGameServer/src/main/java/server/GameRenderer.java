@@ -1,12 +1,14 @@
 package server;
 
 import utils.Constants;
+import utils.bullets.Bullet;
 import utils.map.Block;
 import utils.map.MapCreator;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -15,9 +17,11 @@ import static utils.Constants.SQUARE_SIZE;
 
 public class GameRenderer extends JPanel {
     private final MapCreator mapCreator;
-    private final Map<String, Enemy2> playerStates;
+    private final Map<String, ServerEnemy> playerStates;
+    private List<Bullet> bullets;
 
-    public GameRenderer(MapCreator mapCreator, Map<String, Enemy2> playerStates) {
+    public GameRenderer(MapCreator mapCreator, Map<String, ServerEnemy> playerStates, List<Bullet> bullets) {
+        this.bullets = bullets;
         this.mapCreator = mapCreator;
         this.playerStates = playerStates;
     }
@@ -31,16 +35,25 @@ public class GameRenderer extends JPanel {
 
         renderPlayerStates(g2);
 
+        renderAdvancedBullets(g2);
+    }
+
+    private void renderAdvancedBullets(Graphics2D g2){
+        for (Bullet bullet : bullets) {
+            Point pos = bullet.getPosition();
+            g2.setColor(Color.RED);
+            g2.fillOval(pos.x, pos.y, 4, 4);
+        }
     }
 
     private void renderMap(Graphics2D g2, MapCreator mapCreator) {
         // Создаем текстуры для разных типов блоков
-        TexturePaint brickTexture = createBrickTexture();
-        TexturePaint leavesTexture = createLeavesTexture();
-        TexturePaint grassTexture = createGrassTexture(); // Новая текстура для травы
+        var brickTexture = createBrickTexture();
+        var leavesTexture = createLeavesTexture();
+        var grassTexture = createGrassTexture(); // Новая текстура для травы
 
-        for (Block block : mapCreator.getWalls()) {
-            Rectangle bounds = block.getBounds();
+        for (var block : mapCreator.getWalls()) {
+            var bounds = block.getBounds();
 
             // Выбираем текстуру в зависимости от ID блока
             switch (block.getId()) {
@@ -64,9 +77,9 @@ public class GameRenderer extends JPanel {
 
     // Создает текстуру светлой травы 20x20
     private TexturePaint createGrassTexture() {
-        int size = SQUARE_SIZE;
-        BufferedImage texture = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
-        Graphics2D g2d = texture.createGraphics();
+        var size = SQUARE_SIZE;
+        var texture = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
+        var g2d = texture.createGraphics();
 
         // Основной цвет травы
         g2d.setColor(new Color(140, 200, 100));
@@ -74,7 +87,7 @@ public class GameRenderer extends JPanel {
 
         // Добавляем немного вариативности для натурального вида
         g2d.setColor(new Color(120, 180, 90));
-        Random random = new Random(456); // Фиксированное seed для повторяемости
+        var random = new Random(456); // Фиксированное seed для повторяемости
 
         // Рисуем случайные точки для текстуры
         for (int i = 0; i < 15; i++) {
@@ -99,10 +112,10 @@ public class GameRenderer extends JPanel {
     private void renderPlayerStates(Graphics2D g2){
         long renderTime = getRenderTimestamp();
 
-        for (Enemy2 state : playerStates.values()) {
+        for (ServerEnemy state : playerStates.values()) {
             Point interpolated = state.getInterpolatedPosition(renderTime);
 
-            if (!state.isBot){
+            if (!state.isBot()){
                 g2.setColor(Color.BLUE);
             } else {
                 g2.setColor(Color.GREEN);
@@ -113,7 +126,7 @@ public class GameRenderer extends JPanel {
     }
 
     private long getRenderTimestamp() {
-        return System.currentTimeMillis() - Constants.INTERPOLATION_DELAY_MS; // ≈100 мс задержка для интерполяции
+        return System.currentTimeMillis() - Constants.INTERPOLATION_DELAY_MS;
     }
 
     // Создает текстуру кирпича 20x20
@@ -142,9 +155,9 @@ public class GameRenderer extends JPanel {
 
     // Создает текстуру листвы 20x20
     private TexturePaint createLeavesTexture() {
-        int size = SQUARE_SIZE;
-        BufferedImage texture = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
-        Graphics2D g2d = texture.createGraphics();
+        var size = SQUARE_SIZE;
+        var texture = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
+        var g2d = texture.createGraphics();
 
         // Основной цвет листвы
         g2d.setColor(new Color(50, 120, 50));
@@ -152,14 +165,14 @@ public class GameRenderer extends JPanel {
 
         // Рисуем узор листьев
         g2d.setColor(new Color(30, 90, 30));
-        Random random = new Random(123); // Фиксированное seed для повторяемости
+        var random = new Random(123); // Фиксированное seed для повторяемости
 
         // Рисуем случайные овалы для имитации листьев
         for (int i = 0; i < 8; i++) {
-            int x = random.nextInt(size);
-            int y = random.nextInt(size);
-            int w = 4 + random.nextInt(6);
-            int h = 3 + random.nextInt(5);
+            var x = random.nextInt(size);
+            var y = random.nextInt(size);
+            var w = 4 + random.nextInt(6);
+            var h = 3 + random.nextInt(5);
             g2d.fillOval(x, y, w, h);
         }
 

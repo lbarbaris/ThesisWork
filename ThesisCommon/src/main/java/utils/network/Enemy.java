@@ -1,67 +1,33 @@
 package utils.network;
 
-import utils.graphs.GraphResource;
-
 import java.awt.*;
 import java.util.LinkedList;
 
-import static utils.Constants.*;
-
 public class Enemy {
-    private boolean isBot;
-    private Point coordinates;
-    private int hp;
-    private final LinkedList<EnemyFrame> positionHistory = new LinkedList<>();
-    private final GraphResource<Double> interpolatedDotsGraph;
-    private final ExtrapolationDotsCounter extrapolationDotsCounter;
-    private int interpolatedDotsCounter;
-    private boolean isInterpolatedSaved;
+    protected boolean isBot;
+    protected int hp;
 
+    protected LinkedList<EnemyFrame> positionHistory;
 
-
-    public Enemy(boolean isBot, int x, int y, int hp, long timestamp) {
-        this.extrapolationDotsCounter = new ExtrapolationDotsCounter();
-        this.interpolatedDotsGraph = new GraphResource<>("Тест интерполяции на " + INTERPOLATION_DELAY_MS + "мс", "количество замеров", "отклонение по расстоянию");
-        this.isBot = isBot;
-        this.coordinates = new Point(x, y);
-        this.hp = hp;
-        interpolatedDotsGraph.addSeries();
-        interpolatedDotsGraph.addSeries();
-        interpolatedDotsCounter = 0;
-        addFrame(x, y, timestamp);
-    }
-
-    public int getHp(){
-        return hp;
-    }
-
-    public boolean isBot() {
-        return isBot;
-    }
-
-    public Point getCoordinates() {
-        return coordinates;
-    }
-
-    @Override
-    public String toString() {
-        return "Enemy { isBot=" + isBot + ", coordinates=" + coordinates + ", hp=" + hp + "}";
+    public void addFrame(int x, int y, long timestamp) {
+        positionHistory.add(new EnemyFrame(x, y, timestamp));
+        if (positionHistory.size() > 10) { // храним максимум 5 фреймов
+            positionHistory.removeFirst();
+        }
     }
 
     public Point getInterpolatedPosition(long renderTime) {
         if (positionHistory.size() < 2) {
             return positionHistory.getLast().toPoint();
         }
-        var diff = 0L;
 
         EnemyFrame prev = null, next = null;
         for (int i = 0; i < positionHistory.size() - 1; i++) {
-            EnemyFrame a = positionHistory.get(i);
-            EnemyFrame b = positionHistory.get(i + 1);
-            if (a.timestamp <= renderTime && b.timestamp >= renderTime) {
+            var a = positionHistory.get(i);
+            var b = positionHistory.get(i + 1);
+            if (a.getTimestamp() <= renderTime && b.getTimestamp() >= renderTime) {
                 prev = a;
                 next = b;
-                diff = b.timestamp - a.timestamp;
                 break;
             }
         }
@@ -70,9 +36,9 @@ public class Enemy {
             return positionHistory.getLast().toPoint();
         }
 
-        double alpha = (renderTime - prev.timestamp) / (double)(next.timestamp - prev.timestamp);
-        int interpX = (int) (prev.x + (next.x - prev.x) * alpha);
-        int interpY = (int) (prev.y + (next.y - prev.y) * alpha);
+        var alpha = (renderTime - prev.getTimestamp()) / (double)(next.getTimestamp() - prev.getTimestamp());
+        var interpX = (int) (prev.getX() + (next.getX() - prev.getX()) * alpha);
+        var interpY = (int) (prev.getY() + (next.getY() - prev.getY()) * alpha);
 
 /*        if (diff % 50 == 0) {
             if (interpolatedDotsCounter < PREDICT_SIZE) {
@@ -90,130 +56,126 @@ public class Enemy {
         return new Point(interpX, interpY);
     }
 
-    public void addFrame(int x, int y, long timestamp) {
-        positionHistory.add(new EnemyFrame(x, y, timestamp));
-        if (positionHistory.size() > 5) { // храним максимум 5 фреймов
-            positionHistory.removeFirst();
-        }
-    }
 
-    public Point getPredictedPosition(long currentTime, long lookaheadTimeMs) {
-        EnemyFrame latest = positionHistory.getLast();
 
-        EnemyFrame previous = positionHistory.getLast();
+    public Point getPredictedPosition(long lookaheadTimeMs) {
+        var latest = positionHistory.getLast();
 
-        for (int i = positionHistory.size() - 2; i >= 0; i--) {
-            EnemyFrame candidate = positionHistory.get(i);
-            if (candidate.x != latest.x || candidate.y != latest.y) {
+        var previous = positionHistory.getLast();
+
+        for (var i = positionHistory.size() - 2; i >= 0; i--) {
+            var candidate = positionHistory.get(i);
+            if (candidate.getX() != latest.getX() || candidate.getY() != latest.getY()) {
                 previous = candidate;
                 break;
             }
         }
 
-        long dt = latest.timestamp - previous.timestamp;
+        var dt = latest.getTimestamp() - previous.getTimestamp();
         if (dt == 0) {
-            return latest.toPoint(); // нет движения
+            return latest.toPoint();
         }
 
-        double dx = latest.x - previous.x;
-        double dy = latest.y - previous.y;
+        var dx = latest.getX() - previous.getX();
+        var dy = latest.getY() - previous.getY();
 
-        double velocityX = dx / dt;
-        double velocityY = dy / dt;
+        var velocityX = dx / dt;
+        var velocityY = dy / dt;
 
-        int predictedX = (int) (latest.x + velocityX * lookaheadTimeMs);
-        int predictedY = (int) (latest.y + velocityY * lookaheadTimeMs);
+        var predictedX = (int) (latest.getX() + velocityX * lookaheadTimeMs);
+        var predictedY = (int) (latest.getY() + velocityY * lookaheadTimeMs);
 
         return new Point(predictedX, predictedY);
     }
 
-
-    public Point getPredictedPositionWithAcceleration(long currentTime, long lookaheadTimeMs) {
+    public Point getPredictedPositionWithAcceleration(long lookaheadTimeMs) {
         if (positionHistory.size() < 3) {
-            return getPredictedPosition(currentTime, lookaheadTimeMs); // fallback
+            return getPredictedPosition(lookaheadTimeMs); // fallback
         }
 
-        EnemyFrame a = positionHistory.get(positionHistory.size() - 3);
-        EnemyFrame b = positionHistory.get(positionHistory.size() - 2);
-        EnemyFrame c = positionHistory.getLast();
+        var a = positionHistory.get(positionHistory.size() - 3);
+        var b = positionHistory.get(positionHistory.size() - 2);
+        var c = positionHistory.getLast();
 
-        double dt1 = b.timestamp - a.timestamp;
-        double dt2 = c.timestamp - b.timestamp;
+        var dt1 = b.getTimestamp() - a.getTimestamp();
+        var dt2 = c.getTimestamp() - b.getTimestamp();
 
         if (dt1 <= 0 || dt2 <= 0) {
             return c.toPoint();
         }
 
-        double vx1 = (b.x - a.x) / dt1;
-        double vy1 = (b.y - a.y) / dt1;
-        double vx2 = (c.x - b.x) / dt2;
-        double vy2 = (c.y - b.y) / dt2;
+        var vx1 = (b.getX() - a.getX()) / dt1;
+        var vy1 = (b.getY() - a.getY()) / dt1;
+        var vx2 = (c.getX() - b.getX()) / dt2;
+        var vy2 = (c.getY() - b.getY()) / dt2;
 
-        double ax = (vx2 - vx1) / dt2;
-        double ay = (vy2 - vy1) / dt2;
+        var ax = (vx2 - vx1) / dt2;
+        var ay = (vy2 - vy1) / dt2;
 
-        double predictedX = c.x + vx2 * lookaheadTimeMs + 0.5 * ax * lookaheadTimeMs * lookaheadTimeMs;
-        double predictedY = c.y + vy2 * lookaheadTimeMs + 0.5 * ay * lookaheadTimeMs * lookaheadTimeMs;
+        var predictedX = c.getX() + vx2 * lookaheadTimeMs + 0.5 * ax * lookaheadTimeMs * lookaheadTimeMs;
+        var predictedY = c.getY() + vy2 * lookaheadTimeMs + 0.5 * ay * lookaheadTimeMs * lookaheadTimeMs;
 
         return new Point((int)predictedX, (int)predictedY);
     }
 
-    public long getHistoryTimeSpan() {
-        return positionHistory.getLast().timestamp - positionHistory.getFirst().timestamp;
-    }
-
-
     public Point getSmartPredictedPosition(long currentTime, long lookaheadTimeMs) {
-        int n = positionHistory.size();
-        if (n < 3) return getPredictedPosition(currentTime, lookaheadTimeMs);
+        var n = positionHistory.size();
+        if (n < 3) return getPredictedPosition(lookaheadTimeMs);
 
-        double[] t = new double[n];
-        double[] x = new double[n];
-        double[] y = new double[n];
+        var t = new double[n];
+        var x = new double[n];
+        var y = new double[n];
 
         for (int i = 0; i < n; i++) {
-            EnemyFrame frame = positionHistory.get(i);
+            var frame = positionHistory.get(i);
             // нормализуем время относительно currentTime
-            t[i] = frame.timestamp - currentTime;
-            x[i] = frame.x;
-            y[i] = frame.y;
+            t[i] = frame.getTimestamp() - currentTime;
+            x[i] = frame.getX();
+            y[i] = frame.getY();
         }
 
-        PolynomialFit xFit = new PolynomialFit(t, x, 3);
-        PolynomialFit yFit = new PolynomialFit(t, y, 3);
+        var xFit = new PolynomialFit(t, x, 3);
+        var yFit = new PolynomialFit(t, y, 3);
 
-        double futureT = lookaheadTimeMs; // через сколько мс от текущего времени
-        double predictedX = xFit.predict(futureT);
-        double predictedY = yFit.predict(futureT);
+        var futureT = lookaheadTimeMs; // через сколько мс от текущего времени
+        var predictedX = xFit.predict(futureT);
+        var predictedY = yFit.predict(futureT);
 
         return new Point((int) predictedX, (int) predictedY);
     }
 
     public Point getPadeSmartPredictedPosition(long currentTime, long lookaheadTimeMs) {
-        int n = positionHistory.size();
-        if (n < 5) return getPredictedPosition(currentTime, lookaheadTimeMs); // Padé(2,2) требует хотя бы 5 точек
+        var n = positionHistory.size();
+        if (n < 5) return getPredictedPosition(lookaheadTimeMs);
 
-        double[] t = new double[n];
-        double[] x = new double[n];
-        double[] y = new double[n];
+        var t = new double[n];
+        var x = new double[n];
+        var y = new double[n];
 
-        for (int i = 0; i < n; i++) {
+        for (var i = 0; i < n; i++) {
             EnemyFrame frame = positionHistory.get(i);
-            t[i] = frame.timestamp - currentTime;
-            x[i] = frame.x;
-            y[i] = frame.y;
+            t[i] = frame.getTimestamp() - currentTime;
+            x[i] = frame.getX();
+            y[i] = frame.getY();
         }
 
-        PadeApproximator xFit = new PadeApproximator(t, x);
-        PadeApproximator yFit = new PadeApproximator(t, y);
+        var xFit = new PadeApproximator(t, x);
+        var yFit = new PadeApproximator(t, y);
 
-        double futureT = lookaheadTimeMs;
-        double predictedX = xFit.predict(futureT);
-        double predictedY = yFit.predict(futureT);
+        var futureT = lookaheadTimeMs;
+        var predictedX = xFit.predict(futureT);
+        var predictedY = yFit.predict(futureT);
 
         return new Point((int) predictedX, (int) predictedY);
     }
 
+    public int getHp(){
+        return hp;
+    }
+
+    public boolean isBot() {
+        return isBot;
+    }
 
     public void doDamage(int damage){
         hp -= damage;
@@ -225,5 +187,9 @@ public class Enemy {
 
     public void setHp(int hp) {
         this.hp = hp;
+    }
+
+    public EnemyFrame getLast(){
+        return positionHistory.getLast();
     }
 }

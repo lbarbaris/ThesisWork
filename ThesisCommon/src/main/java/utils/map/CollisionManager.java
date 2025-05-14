@@ -21,4 +21,15 @@ public class CollisionManager {
         }
         return res;
     }
+
+    public Point getPointWallHit(Shape bullet){
+        Point res = null;
+        for (Block block : map) {
+            if (block.intersects((Rectangle2D) bullet) && !block.isAir()) {
+                res = new Point(block.x, block.y);
+                break;
+            }
+        }
+        return res;
+    }
 }

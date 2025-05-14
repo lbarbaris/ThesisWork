@@ -5,7 +5,7 @@ import utils.bullets.BulletManager;
 import movement.MovementManager;
 import utils.network.Frame;
 import utils.player.Player;
-import utils.network.Enemy;
+import utils.network.ClientEnemy;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -24,7 +24,7 @@ public class NetworkHandler {
     private final int serverPort;
     private final ExecutorService networkThreads = Executors.newFixedThreadPool(2);
     private volatile boolean running = true;
-    private HashMap<String, Enemy> PlayerCoords;
+    private HashMap<String, ClientEnemy> PlayerCoords;
     private Player player;
     private int packetCounter;
 
@@ -109,9 +109,9 @@ public class NetworkHandler {
             String id = parts[i + 2];
             boolean bot = Boolean.parseBoolean(parts[i + 3]);
 
-            Enemy enemy = PlayerCoords.getOrDefault(id, new Enemy(bot, x, y, Constants.PLAYER_MAX_HP, serverTimeStamp));
-            enemy.addFrame(x, y, serverTimeStamp);
-            PlayerCoords.put(id, enemy);
+            var clientEnemy = PlayerCoords.getOrDefault(id, new ClientEnemy(bot, x, y, Constants.PLAYER_MAX_HP));
+            clientEnemy.addFrame(x, y, serverTimeStamp);
+            PlayerCoords.put(id, clientEnemy);
         }
 
     }
@@ -122,11 +122,11 @@ public class NetworkHandler {
         networkThreads.shutdownNow();
     }
 
-    public HashMap<String, Enemy> getPlayerCoords(){
+    public HashMap<String, ClientEnemy> getPlayerCoords(){
         return PlayerCoords;
     }
 
-    public void putToPlayerCoords(Enemy enemy){
-        PlayerCoords.put("target", enemy);
+    public void putToPlayerCoords(ClientEnemy clientEnemy){
+        PlayerCoords.put("target", clientEnemy);
     }
 }

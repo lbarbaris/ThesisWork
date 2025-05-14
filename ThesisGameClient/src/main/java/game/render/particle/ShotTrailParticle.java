@@ -1,13 +1,13 @@
-package game.render;
+package game.render.particle;
 
 import java.awt.*;
 
-public class ShotTrail {
+public class ShotTrailParticle {
     private Point start;
     private Point end;
     private long shotTime;
 
-    public ShotTrail(Point start, Point end, long shotTime) {
+    public ShotTrailParticle(Point start, Point end, long shotTime) {
         this.start = start;
         this.end = end;
         this.shotTime = shotTime;

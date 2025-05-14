@@ -1,7 +1,7 @@
 package utils.bullets;
 
 import utils.Constants;
-import utils.network.Enemy;
+import utils.network.ClientEnemy;
 import utils.player.Player;
 
 import javax.swing.*;
@@ -11,10 +11,10 @@ import java.util.HashMap;
 import static java.lang.Math.atan2;
 
 public class BulletManager extends Thread {
-    private final HashMap<Enemy, Long> enemyHitTimes;
+    private final HashMap<ClientEnemy, Long> enemyHitTimes;
     private final JPanel panel;
     private final Player player;
-    private final Enemy targetEnemy;
+    private final ClientEnemy targetClientEnemy;
 
 
     private volatile boolean shooting;
@@ -22,18 +22,14 @@ public class BulletManager extends Thread {
     private volatile Point lastHitPoint;
     private Thread shootingThread;
     private RayCastManager rayCastManager;
-    private HashMap<String, Enemy> playerCoords = null;
+    private HashMap<String, ClientEnemy> playerCoords = null;
 
-    public void setPlayerCoords(HashMap<String, Enemy> playerCoords) {
-        this.playerCoords = playerCoords;
-    }
-
-    public BulletManager(Player player, JPanel panel, Enemy targetEnemy, RayCastManager rayCastManager) {
+    public BulletManager(Player player, JPanel panel, ClientEnemy targetClientEnemy, RayCastManager rayCastManager) {
         this.rayCastManager = rayCastManager;
         this.player = player;
         this.lastHitPoint = null;
         this.panel = panel;
-        this.targetEnemy = targetEnemy;
+        this.targetClientEnemy = targetClientEnemy;
         this.enemyHitTimes = new HashMap<>();
     }
 
@@ -60,6 +56,7 @@ public class BulletManager extends Thread {
                 double startX = player.getX();
                 double startY = player.getY();
 
+
                 double angle = atan2(mouseY - startY, mouseX - startX);
 
                 RaycastHit hit = rayCastManager.raycast(angle, playerCoords);
@@ -73,14 +70,14 @@ public class BulletManager extends Thread {
                 }
 
                 if (hit.type == HitType.ENEMY) {
-                    Enemy enemy = hit.hitEnemy;
-                    enemy.doDamage(gun.getDamage());
-                    enemyHitTimes.put(enemy, System.currentTimeMillis());
-                    System.out.println("Попадание! Цель: " + enemy);
-                    if (enemy == targetEnemy) {
+                    ClientEnemy clientEnemy = hit.hitClientEnemy;
+                    clientEnemy.doDamage(gun.getDamage());
+                    enemyHitTimes.put(clientEnemy, System.currentTimeMillis());
+                    System.out.println("Попадание! Цель: " + clientEnemy);
+                    if (clientEnemy == targetClientEnemy) {
                         System.out.println("Попал по мишени!");
-                        if (enemy.getHp() <= 0) {
-                            enemy.setHp(Constants.PLAYER_MAX_HP);
+                        if (clientEnemy.getHp() <= 0) {
+                            clientEnemy.setHp(Constants.PLAYER_MAX_HP);
                             System.out.println("Цель убита и возродилась.");
                         }
                     }
@@ -110,7 +107,7 @@ public class BulletManager extends Thread {
 
 
 
-    public HashMap<Enemy, Long> getEnemyHitTimes() {
+    public HashMap<ClientEnemy, Long> getEnemyHitTimes() {
         return enemyHitTimes;
     }
 
@@ -118,6 +115,9 @@ public class BulletManager extends Thread {
         return lastHitPoint;
     }
 
+    public void setPlayerCoords(HashMap<String, ClientEnemy> playerCoords) {
+        this.playerCoords = playerCoords;
+    }
 
     public boolean isShooting() {
         return shooting;

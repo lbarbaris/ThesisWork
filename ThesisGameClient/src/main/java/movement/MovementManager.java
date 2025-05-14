@@ -2,7 +2,7 @@ package movement;
 
 
 
-import game.GameRenderer;
+import game.render.particle.ParticleEffectsRenderer;
 import utils.Constants;
 import utils.input.KeyboardController;
 import utils.map.CollisionManager;
@@ -19,12 +19,12 @@ public class MovementManager {
     private final Player player;
     private final PlayerCameraManager playerCameraManager;
     private final CollisionManager collisionManager;
-    private GameRenderer gameRenderer;
+    private ParticleEffectsRenderer particleEffectsRenderer;
 
     private int x, dx, y, dy; // Локальные координаты
 
-    public void setGameRenderer(GameRenderer gameRenderer) {
-        this.gameRenderer = gameRenderer;
+    public void setParticleEffectsRenderer(ParticleEffectsRenderer particleEffectsRenderer) {
+        this.particleEffectsRenderer = particleEffectsRenderer;
     }
 
     public MovementManager(
@@ -82,7 +82,7 @@ public class MovementManager {
                 x = nextX;
                 y = nextY;
             }
-            gameRenderer.createMovementParticles(player, dx, dy);
+            particleEffectsRenderer.createMovementParticles(new Point((int) player.getX(), (int) player.getY()), dx, dy);
         }
 
         // Обновляем координаты игрока и камеры

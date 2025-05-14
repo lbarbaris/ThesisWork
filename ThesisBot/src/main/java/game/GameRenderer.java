@@ -10,7 +10,7 @@ import utils.bullets.BulletManager;
 import utils.bullets.Gun;
 import map.paths.PathfindingAbstractClass;
 import network.NetworkHandler;
-import utils.network.Enemy;
+import utils.network.ClientEnemy;
 import utils.player.Player;
 import utils.map.MapCreator;
 import utils.player.PlayerCameraManager;
@@ -71,21 +71,21 @@ public class GameRenderer {
 
 
     private void renderEnemies(Graphics2D g2){
-        HashMap<String, Enemy> coords = networkHandler.getPlayerCoords();
+        HashMap<String, ClientEnemy> coords = networkHandler.getPlayerCoords();
         long renderTime = System.currentTimeMillis() - Constants.INTERPOLATION_DELAY_MS;
 
-        HashMap<Enemy, Long> hitTimes = bulletManager.getEnemyHitTimes();
+        HashMap<ClientEnemy, Long> hitTimes = bulletManager.getEnemyHitTimes();
 
 
 
-        for (Map.Entry<String, Enemy> entry : coords.entrySet()) {
-            Enemy enemy = entry.getValue();
+        for (Map.Entry<String, ClientEnemy> entry : coords.entrySet()) {
+            ClientEnemy clientEnemy = entry.getValue();
             Point interpPos = new Point(0, 0); // enemy.getInterpolatedPosition(renderTime);
             if (!hitTimes.isEmpty() && hitTimes.get(entry.getValue()) != null && (System.currentTimeMillis() - hitTimes.get(entry.getValue()) < Constants.INTERPOLATION_DELAY_MS)){
                 g2.setColor(Color.RED);
             }
             else {
-                if (enemy.isBot()) {
+                if (clientEnemy.isBot()) {
                     g2.setColor(Color.GREEN);
                 } else {
                     g2.setColor(Color.PINK);

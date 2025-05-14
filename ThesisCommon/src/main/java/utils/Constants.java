@@ -1,7 +1,7 @@
 package utils;
 
 public class Constants {
-    public static final int INTERPOLATION_DELAY_MS = 1050;
+    public static final int INTERPOLATION_DELAY_MS = 100;
     public static final int SERVER_SEND_SLEEP_MS = 50;// INTERPOLATION_DELAY_MS;
 
     public static final int SQUARE_SIZE = 20;

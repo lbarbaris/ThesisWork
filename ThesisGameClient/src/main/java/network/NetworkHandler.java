@@ -1,9 +1,10 @@
 package network;
 
+import utils.bullets.Bullet;
 import movement.MovementManager;
 import utils.Constants;
 import utils.graphs.GraphResource;
-import utils.network.Enemy;
+import utils.network.ClientEnemy;
 
 import java.awt.*;
 import java.io.IOException;
@@ -11,6 +12,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -31,7 +33,7 @@ public class NetworkHandler {
     private final ExecutorService networkThreads = Executors.newFixedThreadPool(2);
     private volatile boolean running = true;
     private final boolean isBot = false;
-    private final HashMap<String, Enemy> PlayerCoords;
+    private final HashMap<String, ClientEnemy> PlayerCoords;
     private final Player player;
     private int packetCounter;
     private LinkedList<Long> packetNumbers;
@@ -132,16 +134,35 @@ public class NetworkHandler {
 
     public void sendMovementRequest(Frame frame) throws IOException {
         movementManager.addCommand();
-        byte[] data = frame.toString().getBytes();
-        DatagramPacket packet = new DatagramPacket(data, data.length, serverAddress, Integer.parseInt(serverPort));
-        socket.send(packet);
+        sendStringData(frame.toString());
     }
 
-    public void sendShootRequest(int playerX, int playerY, int mouseX, int mouseY) throws IOException {
-        String shootPacket = "SHOOT," + playerX + "," + playerY + "," + mouseX + "," + mouseY + "," + System.currentTimeMillis();
-        byte[] data = shootPacket.getBytes();
-        DatagramPacket packet = new DatagramPacket(data, data.length, serverAddress, Integer.parseInt(serverPort));
-        socket.send(packet);
+    public void sendBasicBullets(int playerX, int playerY, int mouseX, int mouseY) {
+        var shootPacket = "SHOOT," + playerX + "," + playerY + "," + mouseX + "," + mouseY + "," + System.currentTimeMillis();
+        sendStringData(shootPacket);
+    }
+
+    private void sendStringData(String data){
+        try {
+            var bytes = data.getBytes();
+            var packet = new DatagramPacket(bytes, bytes.length, serverAddress, Integer.parseInt(serverPort));
+            socket.send(packet);
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void sendAdvancedBullets(List<Bullet> bullets) {
+        var shootPacket = new StringBuilder("ADVSHOOT,");
+        for (var bullet: bullets){
+            shootPacket
+                    .append(bullet.getStartX()).append(",")
+                    .append(bullet.getStartY()).append(",")
+                    .append(bullet.getDx()).append(",")
+                    .append(bullet.getDy()).append(",");
+        }
+        sendStringData(shootPacket.toString());
     }
 
     private void receiveServerData() throws IOException {
@@ -181,16 +202,17 @@ public class NetworkHandler {
             String id = parts[i + 2];
             boolean bot = Boolean.parseBoolean(parts[i + 3]);
 
-            Enemy enemy = PlayerCoords.getOrDefault(id, new Enemy(bot, x, y, Constants.PLAYER_MAX_HP, serverTimeStamp));
+            var enemy = PlayerCoords.getOrDefault(id, new ClientEnemy(bot, x, y, Constants.PLAYER_MAX_HP));
 /*            if (System.currentTimeMillis() - startTime > randomTime) {*/
 /*                if (predictedDotsCounter < PREDICT_SIZE) {*/
-                   int j = 50;
-                        var point = new Point(enemy.getPredictedPositionWithAcceleration(System.currentTimeMillis(), j));
-                        var primitivePoint = new Point(enemy.getPredictedPosition(System.currentTimeMillis(), j));
+                   int j = 100;
+                        var point = new Point(enemy.getPredictedPositionWithAcceleration(j));
+                        var primitivePoint = new Point(enemy.getPredictedPosition(j));
+                        var primitivePoint2 = new Point(enemy.getPredictedPosition(50));
                         var smartPoint = new Point(enemy.getSmartPredictedPosition(System.currentTimeMillis(), j));
                         var padeSmartPoint = new Point(enemy.getPadeSmartPredictedPosition(System.currentTimeMillis(), j));
                         uniquePoint = primitivePoint;
-                        realPoint = extrapolationDotsCounter.getDistanceToNearestPoint(primitivePoint);
+                        realPoint = extrapolationDotsCounter.getDistanceToNearestPoint(primitivePoint2);
                         uniquePoints.add(primitivePoint);
                         realPoints.add(extrapolationDotsCounter.getDistanceToNearestPoint(primitivePoint));
 /*                        var distance = extrapolationDotsCounter.getDistanceToNearestPoint(point);
@@ -226,11 +248,11 @@ public class NetworkHandler {
 
     }
 
-    public void putToPlayerCoords(Enemy enemy){
-        PlayerCoords.put("target", enemy);
+    public void putToPlayerCoords(ClientEnemy clientEnemy){
+        PlayerCoords.put("target", clientEnemy);
     }
 
-    public HashMap<String, Enemy> getPlayerCoords(){
+    public HashMap<String, ClientEnemy> getPlayerCoords(){
         return PlayerCoords;
     }
 
@@ -240,6 +262,8 @@ public class NetworkHandler {
         socket.close();
         networkThreads.shutdownNow();
     }
+
+
 
 
     public Set<Point> getUniquePoints() {

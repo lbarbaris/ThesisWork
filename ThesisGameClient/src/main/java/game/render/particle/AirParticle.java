@@ -1,4 +1,4 @@
-package game.render;
+package game.render.particle;
 
 import java.awt.*;
 import java.util.Random;

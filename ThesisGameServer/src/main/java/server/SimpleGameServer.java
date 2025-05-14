@@ -3,31 +3,35 @@ package server;
 import utils.Constants;
 import utils.map.CollisionManager;
 import utils.map.MapCreator;
+import utils.bullets.Bullet;
 
 import javax.swing.*;
+import javax.swing.Timer;
 import java.awt.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static java.lang.Math.abs;
-import static utils.Constants.SERVER_SEND_SLEEP_MS;
+import static utils.Constants.*;
 
 public class SimpleGameServer {
     private long packetPreparationStartTime;
     private int pingCounter;
     private final MapCreator mapCreator;
     private final DatagramSocket socket;
+    private final List<Bullet> bullets;
     private final CollisionManager collisionManager;
-    private final ConcurrentHashMap<String, Enemy2> playerStates = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, ServerEnemy> playerStates = new ConcurrentHashMap<>();
 
 
     public SimpleGameServer(int port) throws Exception {
-        pingCounter = 1;
+        this.bullets = new CopyOnWriteArrayList<>();
+        this.pingCounter = 1;
         this.packetPreparationStartTime = 0;
         this.mapCreator = new MapCreator((short) 3);
         this.collisionManager = new CollisionManager(mapCreator.getWalls());
@@ -65,12 +69,20 @@ public class SimpleGameServer {
                     int mouseY = Integer.parseInt(parts[4]);
                     long shotTime = Long.parseLong(parts[5]);
 
-                    // Сохрани snapshot мира по времени shotTime
-                    Map<String, Enemy2> snapshot = getWorldStateAt(shotTime);
-
                     performServerSideRaycast( shooterX, shooterY, mouseX, mouseY, playerKey, shotTime - Constants.INTERPOLATION_DELAY_MS);
                 }
-                else {
+                else if (parts[0].equals("ADVSHOOT")){
+                    for (int i = 1; i < parts.length; i += 4) {
+                        var startX = Float.parseFloat(parts[i]);
+                        var startY = Float.parseFloat(parts[i + 1]);
+                        var dx = Float.parseFloat(parts[i + 2]);
+                        var dy = Float.parseFloat(parts[i + 3]);
+
+                        Bullet bullet = new Bullet(startX, startY, dx, dy, 1, 1);
+                        bullets.add(bullet);
+                    }
+                }
+                else{
 
                     int clientX = Integer.parseInt(parts[0]);
                     int clientY = Integer.parseInt(parts[1]);
@@ -80,21 +92,19 @@ public class SimpleGameServer {
                     int packetNumber = Integer.parseInt(parts[5]);
 
 
-                    playerStates.put(playerKey, new Enemy2(clientX, clientY, isBot, hp, packetNumber));
+                    playerStates.put(playerKey, new ServerEnemy(clientX, clientY, isBot, hp, packetNumber));
 
 
-                    Enemy2 state = playerStates.get(playerKey);
+                    var state = playerStates.get(playerKey);
                     int maxDistance = 5; // Максимально допустимый шаг
-                    int dxAllowed = Math.min(maxDistance, abs(clientX - state.x));
-                    int dyAllowed = Math.min(maxDistance, abs(clientY - state.y));
+                    int dxAllowed = Math.min(maxDistance, abs(clientX - state.getLast().getX()));
+                    int dyAllowed = Math.min(maxDistance, abs(clientY - state.getLast().getY()));
 
-                    int newX = state.x + (int) Math.signum(clientX - state.x) * dxAllowed;
-                    int newY = state.y + (int) Math.signum(clientY - state.y) * dyAllowed;
+                    int newX = state.getLast().getX() + (int) Math.signum(clientX - state.getLast().getX()) * dxAllowed;
+                    int newY = state.getLast().getY() + (int) Math.signum(clientY - state.getLast().getY()) * dyAllowed;
 
                     if (!collisionManager.isWallHit(new Rectangle(newX, newY, Constants.SQUARE_SIZE, Constants.SQUARE_SIZE))) {
-                        state.x = newX;
-                        state.y = newY;
-                        state.lastProcessedTimestamp = timestamp;
+                        state.addFrame(newX, newY, timestamp);
                     }
                 }
 
@@ -103,21 +113,6 @@ public class SimpleGameServer {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    private Map<String, Enemy2> getWorldStateAt(long timestamp) {
-        Map<String, Enemy2> snapshot = new HashMap<>();
-        long correctedTimestamp = timestamp - Constants.INTERPOLATION_DELAY_MS;
-
-        for (Map.Entry<String, Enemy2> entry : playerStates.entrySet()) {
-            Enemy2 state = entry.getValue();
-            Enemy2 past = state.getStateAt(correctedTimestamp);
-            if (past != null) {
-                snapshot.put(entry.getKey(), past);
-            }
-        }
-
-        return snapshot;
     }
 
     private void performServerSideRaycast(int shooterX, int shooterY, int mouseX, int mouseY, String shooterId, long timestamp) {
@@ -131,19 +126,19 @@ public class SimpleGameServer {
         double step = 1.0;
         double radius = Constants.SQUARE_SIZE / 2.0;
 
-        Enemy2 shooter = playerStates.get(shooterId);
+        ServerEnemy shooter = playerStates.get(shooterId);
         if (shooter == null) return;
 
-        Enemy2 hitTarget = null;
+        ServerEnemy hitTarget = null;
         Point hitPoint = null;
         double closestEnemyDist = Double.MAX_VALUE;
 
         // Сначала проверяем попадание во врагов
-        for (Map.Entry<String, Enemy2> entry : playerStates.entrySet()) {
+        for (Map.Entry<String, ServerEnemy> entry : playerStates.entrySet()) {
             String id = entry.getKey();
             if (id.equals(shooterId)) continue;
 
-            Enemy2 target = entry.getValue();
+            ServerEnemy target = entry.getValue();
             Point enemyPos = target.getInterpolatedPosition(timestamp);
             double tx = enemyPos.x + radius;
             double ty = enemyPos.y + radius;
@@ -182,8 +177,8 @@ public class SimpleGameServer {
 
         // Если попали по врагу
         if (hitTarget != null) {
-            hitTarget.hp -= 20;
-            System.out.println("Игрок " + shooterId + " попал по врагу! Осталось HP: " + hitTarget.hp);
+            hitTarget.setHp(hitTarget.getHp() - 20);
+            System.out.println("Игрок " + shooterId + " попал по врагу! Осталось HP: " + hitTarget.getHp());
         }
     }
 
@@ -191,19 +186,25 @@ public class SimpleGameServer {
         try {
             while (true) {
                 packetPreparationStartTime = System.currentTimeMillis();
-                for (Map.Entry<String, Enemy2> entry : playerStates.entrySet()) {
-                    String[] keyParts = entry.getKey().split(":");
-                    InetAddress address = InetAddress.getByName(keyParts[0].substring(1));
-                    int port = Integer.parseInt(keyParts[1]);
-                    Enemy2 state = entry.getValue();
+                for (Map.Entry<String, ServerEnemy> entry : playerStates.entrySet()) {
+                    var keyParts = entry.getKey().split(":");
+                    var address = InetAddress.getByName(keyParts[0].substring(1));
+                    var port = Integer.parseInt(keyParts[1]);
+                    var state = entry.getValue();
 
-                    StringBuilder response = new StringBuilder(state.toString());
+                    var response = new StringBuilder(state.toString());
 
-                    for (Map.Entry<String, Enemy2> entry1: playerStates.entrySet()){
+                    for (Map.Entry<String, ServerEnemy> entry1: playerStates.entrySet()){
                         if (!Objects.equals(entry1.getKey(), entry.getKey())){
-                            response.append(entry1.getValue().x).append(",").append(entry1.getValue().y).append(",").append(entry1.getKey()).append(",").append(entry1.getValue().isBot).append(",").append(entry1.getValue().hp).append(",").append(entry1.getValue().getPacketNumber()).append(",");
+                            response.append(entry1.getValue().getLast().getX()).append(",")
+                                    .append(entry1.getValue().getLast().getY()).append(",")
+                                    .append(entry1.getKey()).append(",")
+                                    .append(entry1.getValue().isBot()).append(",")
+                                    .append(entry1.getValue().getHp()).append(",")
+                                    .append(entry1.getValue().getPacketNumber()).append(",");
                         }
                     }
+
 
                     byte[] responseData = response.toString().getBytes();
                     DatagramPacket responsePacket = new DatagramPacket(responseData, responseData.length, address, port);
@@ -224,15 +225,47 @@ public class SimpleGameServer {
         }
     }
 
+    private void updateBullets() {
+        for (var bullet : bullets) {
+            bullet.update();
+
+            var bulletBounds = bullet.getBounds();
+
+            // Проверка столкновения со стеной
+            if (collisionManager.isWallHit(bulletBounds)) {
+                var wallPoint = collisionManager.getPointWallHit(bulletBounds);
+                System.out.println("Пуля попала в стену: " + wallPoint);
+                bullets.remove(bullet);
+                continue;
+            }
+
+            // Проверка попадания по врагам
+            for (var enemy : playerStates.values()) {
+                var interpolatedPosition = enemy.getInterpolatedPosition(INTERPOLATION_DELAY_MS);
+                var bounds = new Rectangle(interpolatedPosition.x, interpolatedPosition.y, SQUARE_SIZE, SQUARE_SIZE);
+                if (bounds.intersects(bulletBounds)) {
+                    enemy.doDamage(bullet.getDamage());
+                    System.out.println("Пуля попала по врагу: " + enemy);
+                    bullets.remove(bullet);
+                    break;
+                }
+            }
+        }
+    }
+
     private void startRendering() {
-        JFrame frame = new JFrame("Game Server");
+        var frame = new JFrame("Game Server");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT);
 
-        GameRenderer renderer = new GameRenderer(mapCreator, playerStates);
+        var renderer = new GameRenderer(mapCreator, playerStates, bullets);
         frame.add(renderer);
         frame.setVisible(true);
 
-        new Timer(16, e -> renderer.repaint()).start();
+        new Timer(16, e -> {renderer.repaint(); updateBullets();}).start();
+    }
+
+    public List<Bullet> getBullets() {
+        return bullets;
     }
 }

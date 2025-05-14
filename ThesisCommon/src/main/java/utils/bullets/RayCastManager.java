@@ -2,9 +2,8 @@ package utils.bullets;
 
 import utils.Constants;
 import utils.map.Block;
-import utils.map.CollisionManager;
 import utils.map.MapCreator;
-import utils.network.Enemy;
+import utils.network.ClientEnemy;
 import utils.player.Player;
 
 import java.awt.*;
@@ -21,7 +20,7 @@ public class RayCastManager {
         this.mapCreator = mapCreator;
     }
 
-    public RaycastHit raycast(double angle, HashMap<String, Enemy> playerCoords) {
+    public RaycastHit raycast(double angle, HashMap<String, ClientEnemy> playerCoords) {
         double px = player.getX();
         double py = player.getY();
         double dx = Math.cos(angle);
@@ -30,8 +29,8 @@ public class RayCastManager {
         RaycastHit result = new RaycastHit();
 
         // --- 1. Проверяем врагов
-        for (Enemy enemy : playerCoords.values()) {
-            Point enemyPos = enemy.getInterpolatedPosition(System.currentTimeMillis() - Constants.INTERPOLATION_DELAY_MS);
+        for (ClientEnemy clientEnemy : playerCoords.values()) {
+            Point enemyPos = clientEnemy.getInterpolatedPosition(System.currentTimeMillis() - Constants.INTERPOLATION_DELAY_MS);
             double tx = enemyPos.x;
             double ty = enemyPos.y;
 
@@ -49,7 +48,7 @@ public class RayCastManager {
 
             if (distSq < radius * radius && dot < result.distance) {
                 result.type = HitType.ENEMY;
-                result.hitEnemy = enemy;
+                result.hitClientEnemy = clientEnemy;
                 result.distance = dot;
                 result.hitPoint = new Point((int) closestX, (int) closestY);
             }
@@ -68,7 +67,7 @@ public class RayCastManager {
                         result.type = HitType.WALL;
                         result.distance = t;
                         result.hitPoint = new Point(checkX, checkY);
-                        result.hitEnemy = null;
+                        result.hitClientEnemy = null;
                     }
                     break;
                 }

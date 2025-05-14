@@ -13,7 +13,7 @@ import utils.bullets.RayCastManager;
 import map.paths.PathfindingAbstractClass;
 import network.NetworkHandler;
 import utils.graphs.GraphResource;
-import utils.network.Enemy;
+import utils.network.ClientEnemy;
 import utils.player.Player;
 import utils.bullets.BulletManager;
 import utils.map.MapCreator;
@@ -29,7 +29,7 @@ import static utils.Constants.BOT_SPAWN_Y;
 public class GameController extends JPanel {
     private final PlayerCameraManager playerCameraManager;
     private final RayCastManager rayCastManager;
-    private final Enemy targetEnemy;
+    private final ClientEnemy targetClientEnemy;
     private final CollisionManager collisionManager;
     private final MovementManager playerMovementManager;
     private final NetworkHandler networkHandler;
@@ -51,7 +51,7 @@ public class GameController extends JPanel {
 
         playerCameraManager = new PlayerCameraManager(1000, 1000);
 
-        targetEnemy = new Enemy(true, 200, 200, Constants.PLAYER_MAX_HP,  System.currentTimeMillis());
+        targetClientEnemy = new ClientEnemy(true, 200, 200, Constants.PLAYER_MAX_HP);
 
         mapCreator = new MapCreator((short) 3);
 
@@ -60,16 +60,17 @@ public class GameController extends JPanel {
         collisionManager = new CollisionManager(mapCreator.getWalls());
         setFocusable(true);
 
-        Gun defaultGun = new Gun(1000, 12.0, 3.0, 100, 2500, (short) 10);
+        //Gun defaultGun = new Gun(100000, 12, 3.0, 100, 2500, (short) 10);
+        var defaultGun = new Gun(1);
         player = new Player(BOT_SPAWN_X, BOT_SPAWN_Y, defaultGun);
 
         this.rayCastManager = new RayCastManager(player, mapCreator);
-        bulletManager = new BulletManager(player, this, targetEnemy, rayCastManager);
+        bulletManager = new BulletManager(player, this, targetClientEnemy, rayCastManager);
 
         playerMovementManager = new MovementManager(BOT_SPAWN_X, BOT_SPAWN_Y, player, playerCameraManager, collisionManager);
 
         networkHandler = new NetworkHandler(Constants.SERVER_ADDRESS, Constants.SERVER_PORT, playerMovementManager, bulletManager, player);
-        networkHandler.putToPlayerCoords(targetEnemy);
+        networkHandler.putToPlayerCoords(targetClientEnemy);
         networkHandler.startNetworkThreads();
 
         bulletManager.setPlayerCoords(networkHandler.getPlayerCoords());
@@ -99,7 +100,7 @@ public class GameController extends JPanel {
     private void updateGame() {
         player.getGun().updateReloadStatus();
 
-        HashMap<String, Enemy> coords = networkHandler.getPlayerCoords();
+        HashMap<String, ClientEnemy> coords = networkHandler.getPlayerCoords();
 
         if (distanceCounter % Constants.BOT_UPDATE_PATH_RATE == 0 && !coords.isEmpty()) {
 
@@ -107,7 +108,7 @@ public class GameController extends JPanel {
             String closestPlayerName = "";
             long renderTime = System.currentTimeMillis() - Constants.INTERPOLATION_DELAY_MS;
 
-            for (Map.Entry<String, Enemy> entry1 : coords.entrySet()) {
+            for (Map.Entry<String, ClientEnemy> entry1 : coords.entrySet()) {
                 double checkDistance = 0;// playerMovementManager.getCell().distance(new Cell(entry1.getValue().getInterpolatedPosition(renderTime)));
 
                 if (checkDistance < distance && !entry1.getValue().isBot()) {

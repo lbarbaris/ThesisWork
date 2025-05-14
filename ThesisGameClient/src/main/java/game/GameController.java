@@ -3,6 +3,10 @@ package game;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
+
+import utils.bullets.AbstractBulletManager;
+import bullets.AdvancedBulletManager;
+import game.render.particle.ParticleEffectsRenderer;
 import network.NetworkHandler;
 import movement.MovementManager;
 import utils.Constants;
@@ -11,36 +15,39 @@ import utils.bullets.RayCastManager;
 import utils.input.KeyboardController;
 import bullets.MouseController;
 import utils.map.CollisionManager;
-import utils.network.Enemy;
+import utils.network.ClientEnemy;
 import utils.player.PlayerCameraManager;
 import utils.map.MapCreator;
-import bullets.BulletManager;
 import utils.player.Player;
 
 import static utils.Constants.*;
 
 public class GameController extends JPanel {
     private final PlayerCameraManager playerCameraManager;
-    private Enemy targetEnemy;
+    private ClientEnemy targetClientEnemy;
     private final CollisionManager collisionManager;
     private final MouseController mouseController;
     private final RayCastManager rayCastManager;
+    private final ParticleEffectsRenderer particleEffectsRenderer;
 
     private final MovementManager playerMovementManager;
     private final NetworkHandler networkHandler;
 
+    private final AbstractBulletManager bulletManager;
+
     private final MapCreator mapCreator;
-    private final BulletManager bulletManager;
 
 
     private final Player player;
     private final GameRenderer gameRenderer;
 
     public GameController(String serverAddress, String serverPort) throws IOException {
+        particleEffectsRenderer = new ParticleEffectsRenderer();
+
         playerCameraManager = new PlayerCameraManager(Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT);
 
 
-        targetEnemy = new Enemy(true, 200, 200, Constants.PLAYER_MAX_HP,  System.currentTimeMillis());
+        targetClientEnemy = new ClientEnemy(true, 200, 200, Constants.PLAYER_MAX_HP);
 
         mapCreator = new MapCreator((short) 3);
 /*        System.out.println(
@@ -52,7 +59,8 @@ public class GameController extends JPanel {
         collisionManager = new CollisionManager(mapCreator.getWalls());
         setFocusable(true);
 
-        Gun defaultGun = new Gun(10, 12.0, 3.0, 30, 1000, 1);
+        //Gun defaultGun = new Gun(30, 50, 3.0, 300, 1000, 1);
+        var defaultGun = new Gun(0);
         player = new Player(PLAYER_SPAWN_X, PLAYER_SPAWN_Y, defaultGun);
         KeyboardController keyboardController = new KeyboardController(player);
 
@@ -64,16 +72,19 @@ public class GameController extends JPanel {
 
         networkHandler = new NetworkHandler(serverAddress, serverPort, playerMovementManager, player);
 
-        networkHandler.putToPlayerCoords(targetEnemy);
+        networkHandler.putToPlayerCoords(targetClientEnemy);
         networkHandler.startNetworkThreads();
-        bulletManager = new BulletManager(player, this, targetEnemy, rayCastManager, networkHandler, mapCreator);
+        bulletManager = new AdvancedBulletManager(player, this, rayCastManager, networkHandler, mapCreator);
+
+        //bulletManager = new BulletManager(player, this, targetEnemy, rayCastManager, networkHandler, mapCreator);
         mouseController = new MouseController(this, bulletManager);
         bulletManager.setPlayerCoords(networkHandler.getPlayerCoords());
-        bulletManager.start();
 
-        gameRenderer = new GameRenderer(playerCameraManager,  mapCreator, playerMovementManager,  networkHandler, SQUARE_SIZE, bulletManager);
 
-        playerMovementManager.setGameRenderer(gameRenderer);
+
+        gameRenderer = new GameRenderer(playerCameraManager,  mapCreator, playerMovementManager,  networkHandler, SQUARE_SIZE, bulletManager, particleEffectsRenderer);
+
+        playerMovementManager.setParticleEffectsRenderer(particleEffectsRenderer);
     }
 
     @Override

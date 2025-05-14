@@ -2,7 +2,7 @@ package utils.bullets;
 
 public class Gun {
     private final long delay;
-    private final double speed;
+    private final int speed;
     private final double accuracy;
     private final int magazineSize;
     private final long reloadTime;
@@ -11,8 +11,9 @@ public class Gun {
     private int currentAmmo;
     private boolean reloading;
     private long reloadStartTime;
+    private int id;
 
-    public Gun(long delay, double speed, double accuracy, int magazineSize, long reloadTime, int damage) {
+    public Gun(long delay, int speed, double accuracy, int magazineSize, long reloadTime, int damage) {
         this.damage = damage;
         this.delay = delay;
         this.speed = speed;
@@ -24,11 +25,46 @@ public class Gun {
         this.reloading = false;
     }
 
+    public Gun(int id) {
+        this.id = id;
+        switch (id) {
+            case 0: // Быстрая, слабая
+                this.delay = 25;
+                this.speed = 15;
+                this.accuracy = 0.9;
+                this.magazineSize = 50;
+                this.reloadTime = 1000;
+                this.damage = 5;
+                break;
+            case 1: // Сбалансированная
+                this.delay = 50;
+                this.speed = 10;
+                this.accuracy = 0.85;
+                this.magazineSize = 30;
+                this.reloadTime = 1500;
+                this.damage = 15;
+                break;
+            case 2: // Медленная, мощная
+                this.delay = 800;
+                this.speed = 25;
+                this.accuracy = 0.75;
+                this.magazineSize = 5;
+                this.reloadTime = 2500;
+                this.damage = 50;
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid gun preset ID: " + id);
+        }
+
+        this.currentAmmo = this.magazineSize;
+        this.reloading = false;
+    }
+
     public long getDelay() {
         return delay;
     }
 
-    public double getSpeed() {
+    public int getSpeed() {
         return speed;
     }
 
@@ -85,7 +121,26 @@ public class Gun {
         }
     }
 
+    @Override
+    public String toString() {
+        return "Gun{" +
+                "delay=" + delay +
+                ", speed=" + speed +
+                ", accuracy=" + accuracy +
+                ", magazineSize=" + magazineSize +
+                ", reloadTime=" + reloadTime +
+                ", damage=" + damage +
+                ", currentAmmo=" + currentAmmo +
+                ", reloading=" + reloading +
+                ", reloadStartTime=" + reloadStartTime +
+                '}';
+    }
+
     public int getDamage(){
         return damage;
+    }
+
+    public int getId() {
+        return id;
     }
 }
